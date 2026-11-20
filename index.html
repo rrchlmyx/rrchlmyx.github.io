@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CBSS业务支撑系统3.0</title>
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--line:#e4e8f0;--text:#1f2a3d;--muted:#7a8699;--pri:#2f6bff;--pri2:#e8efff;--ok:#16a34a;--warn:#e88a00;--bad:#dc2626;--side:#14213d;--sideText:#c9d3e6}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+a{color:var(--pri);cursor:pointer;text-decoration:none}
+#app{display:flex;min-height:100vh}
+#side{width:220px;background:var(--side);color:var(--sideText);flex-shrink:0;position:sticky;top:0;height:100vh;overflow:auto}
+#side .brand{padding:18px 18px 12px;font-weight:700;color:#fff;font-size:16px;line-height:1.4}
+#side .brand small{display:block;font-weight:400;color:#8fa0bf;font-size:12px}
+#side .grp{padding:12px 18px 4px;font-size:12px;color:#7083a6}
+#side .nav{display:block;padding:9px 18px 9px 22px;color:var(--sideText);border-left:3px solid transparent}
+#side .nav:hover{background:#1d2d50}
+#side .nav.on{background:#203463;color:#fff;border-left-color:#5b8cff}
+#main{flex:1;min-width:0;display:flex;flex-direction:column}
+#top{height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:12px;position:sticky;top:0;z-index:5}
+#top h1{font-size:17px;margin:0;flex:1}
+#menuBtn{display:none;border:0;background:none;font-size:22px;cursor:pointer}
+.op-sel{display:flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap}
+.tag-sim{background:#fff4e0;color:#a35b00;border:1px solid #f6d29b;border-radius:10px;padding:2px 8px;font-size:12px;white-space:nowrap}
+#content{padding:18px;max-width:1400px;width:100%}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3 .sp{flex:1}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}
+.kpi .l{color:var(--muted);font-size:12px}.kpi .v{font-size:24px;font-weight:700;margin-top:6px}.kpi .s{font-size:12px;color:var(--muted);margin-top:4px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{background:#f7f9fc;color:#56627a;font-weight:600}
+tr:hover td{background:#fafbff}
+.btn{display:inline-block;border:1px solid var(--line);background:#fff;color:var(--text);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;line-height:1.3}
+.btn:hover{border-color:var(--pri);color:var(--pri)}
+.btn.p{background:var(--pri);border-color:var(--pri);color:#fff}.btn.p:hover{opacity:.9;color:#fff}
+.btn.d{color:var(--bad);border-color:#f3c0c0}.btn.s{padding:3px 8px;font-size:12px}
+.btn+.btn{margin-left:6px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:#eef1f6;color:#56627a}
+.b-ok{background:#e7f7ec;color:var(--ok)}.b-warn{background:#fff3e0;color:var(--warn)}.b-bad{background:#fdecec;color:var(--bad)}.b-pri{background:var(--pri2);color:var(--pri)}
+.muted{color:var(--muted)}.right{text-align:right}.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.toolbar .btn+.btn{margin-left:0}
+input,select,textarea{font:inherit;border:1px solid #cfd6e3;border-radius:6px;padding:7px 9px;background:#fff;color:var(--text);max-width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px var(--pri2)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form .f{display:flex;flex-direction:column;gap:5px}.form .f.full{grid-column:1/-1}
+.form label{font-size:12px;color:#56627a}
+#mask{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:40px 12px}
+#modal{background:#fff;border-radius:12px;width:680px;max-width:100%;box-shadow:0 20px 50px rgba(0,0,0,.2)}
+#modal .mh{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;display:flex}
+#modal .mh span{flex:1}#modal .mb{padding:18px;max-height:70vh;overflow:auto}#modal .mf{padding:12px 18px;border-top:1px solid var(--line);text-align:right}
+#toast{position:fixed;left:50%;top:20px;transform:translateX(-50%);background:#1f2a3d;color:#fff;padding:9px 16px;border-radius:8px;z-index:99;display:none;max-width:90vw}
+.items-row{display:flex;gap:6px;margin-bottom:6px;align-items:center}
+.items-row select{flex:1;min-width:0}.items-row input{width:80px}
+.bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px}
+.bar .bl{width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bar .bt{flex:1;background:#eef1f6;border-radius:4px;height:14px;overflow:hidden}.bar .bf{height:100%;background:var(--pri)}
+.donut{width:130px;height:130px;border-radius:50%;position:relative;flex-shrink:0}
+.donut:after{content:"";position:absolute;inset:26px;background:#fff;border-radius:50%}
+.legend div{font-size:12px;margin:4px 0}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:13px}.kv>div:nth-child(odd){color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+.tabs a{padding:8px 12px;color:var(--muted);border-bottom:2px solid transparent}.tabs a.on{color:var(--pri);border-bottom-color:var(--pri)}
+.note{background:#f7f9fc;border:1px dashed #cfd6e3;border-radius:8px;padding:10px 12px;color:#56627a;font-size:12px;line-height:1.7}
+.chips span{display:inline-block;background:var(--pri2);color:var(--pri);border-radius:10px;padding:1px 8px;font-size:12px;margin:2px 4px 2px 0}
+@media (max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3,.g2{grid-template-columns:1fr}}
+@media (max-width:760px){
+ #side{position:fixed;left:-240px;z-index:40;transition:left .2s;width:230px}
+ #side.open{left:0;box-shadow:0 0 30px rgba(0,0,0,.4)}
+ #menuBtn{display:block}#content{padding:12px}
+ .form{grid-template-columns:1fr}
+ #top{padding:0 10px}#top h1{font-size:15px}#curMonth{display:none}.op-l{display:none}#opSel select{max-width:120px!important;font-size:12px}.tag-sim{font-size:11px;padding:1px 6px}
+ .kpi .v{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+ <aside id="side"></aside>
+ <div id="main">
+  <div id="top"><button id="menuBtn" onclick="toggleSide()">☰</button><h1 id="title">总览</h1><span id="opSel" class="op-sel"></span><span class="muted" id="curMonth"></span></div>
+  <div id="content"></div>
+ </div>
+</div>
+<div id="mask"><div id="modal"><div class="mh"><span id="mTitle"></span><a onclick="closeModal()">✕</a></div><div class="mb" id="mBody"></div><div class="mf" id="mFoot"></div></div></div>
+<div id="toast"></div>
+<input type="file" id="importFile" accept=".json,application/json" style="display:none">
+<script>
+"use strict";
+/* ========== 基础工具 ========== */
+var KEY='bss_sim_state_v1';
+var S=null;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function pad(n){return (n<10?'0':'')+n}
+function nowStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())}
+function today(){return nowStr().slice(0,10)}
+function money(n){n=Math.round((+n||0)*100)/100;return '¥'+n.toFixed(2)}
+function r2(n){return Math.round((+n||0)*100)/100}
+function nextMonth(m){var y=+m.slice(0,4),mo=+m.slice(5,7)+1;if(mo>12){mo=1;y++}return y+'-'+pad(mo)}
+function uid(p){S.seq=(S.seq||1000)+1;return p+S.seq}
+function bizNo(prefix){S.noSeq=(S.noSeq||0)+1;var d=new Date();return prefix+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+String(S.noSeq).padStart(5,'0')}
+function toast(t){var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(function(){e.style.display='none'},2400)}
+// 存储层：localStorage 不可用（如 App 内预览/沙箱）时退回内存，本次打开期间照常使用
+var MEMSTORE={},STORE_OK=null,STORE_NOTICED=false;
+function storeOk(){if(STORE_OK!==null)return STORE_OK;try{var ls=window.localStorage,k='__bss_t';ls.setItem(k,'1');ls.removeItem(k);STORE_OK=true}catch(e){STORE_OK=false}return STORE_OK}
+function sGet(k){if(storeOk()){try{return window.localStorage.getItem(k)}catch(e){STORE_OK=false}}return Object.prototype.hasOwnProperty.call(MEMSTORE,k)?MEMSTORE[k]:null}
+function sSet(k,v){MEMSTORE[k]=String(v);if(storeOk()){try{window.localStorage.setItem(k,v);return true}catch(e){if(!(e&&/quota/i.test(String(e.name)+String(e.message))))STORE_OK=false;else{toast('保存失败：浏览器存储空间不足');return false}}}storeNotice();return false}
+function sDel(k){delete MEMSTORE[k];if(storeOk()){try{window.localStorage.removeItem(k)}catch(e){STORE_OK=false}}}
+function storeNotice(){if(STORE_NOTICED)return;STORE_NOTICED=true;setTimeout(function(){var d=document.createElement('div');d.id='storeNote';d.textContent='当前环境无法保存数据，关闭后数据会清空';d.style.cssText='position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(30,41,59,.85);color:#fff;font-size:12px;padding:6px 12px;border-radius:14px;z-index:9999;pointer-events:none;max-width:90%;text-align:center';(document.body||document.documentElement).appendChild(d);setTimeout(function(){if(d.parentNode)d.style.opacity='.55'},6000)},0)}
+function save(){try{sSet(KEY,JSON.stringify(S))}catch(e){toast('保存失败：'+e.message)}}
+function clearCustomers(){S.customers=[];S.tickets=[];S.bills=[];S.txns=[];S.pointLogs=[];S.campUses=[];S.custCleared1=true}
+function clearPlansData(o){o=o||S;o.plans=[];o.addons=[];
+ (o.customers||[]).forEach(function(c){c.planId='';c.addons=[]});
+ (o.campaigns||[]).forEach(function(c){c.plans=[]});
+ o.campaigns=(o.campaigns||[]).filter(function(c){return !c._planOnly});}
+function clearProductsData(o){o=o||S;o.products=[];
+ (o.plans||[]).forEach(function(p){p.items=[]});(o.addons||[]).forEach(function(a){a.items=[]});
+ o.mall=(o.mall||[]).filter(function(m){return m.kind!=='商品'&&!m.pid});
+ o.campaigns=(o.campaigns||[]).filter(function(c){return !(c.type==='赠送商品'||c.pid)});
+ (o.customers||[]).forEach(function(c){c.gifts=[]});}
+function clearLogsData(o){o=o||S;o.logs=[];(o.tickets||[]).forEach(function(t){if(t.undoLog&&t.status!=='已关闭'){delete t.undoLog}})}
+function migratePlans1(o){
+ (o.campaigns||[]).forEach(function(c){if(c.plans&&c.plans.length)c._planOnly=1});
+ clearProductsData(o);clearPlansData(o);clearLogsData(o);o.plansCleared1=true}
+function load(){try{var t=sGet(KEY);if(t){S=JSON.parse(t);if(S&&S.customers&&!S.custCleared1){clearCustomers();save()}if(S&&S.customers&&!S.plansCleared1){migratePlans1(S);save()}if(S&&S.customers)ensureFields(S);return !!(S&&S.customers)}}catch(e){}return false}
+function clearAllPlans(){if(!cf('确认删除所有套餐？可选包也会一起删除，客户的套餐和已订可选包会清空（显示为“-”），客户本身保留。',function(){clearAllPlans()}))return;(S.campaigns||[]).forEach(function(c){if(c.plans&&c.plans.length)c._planOnly=1});clearPlansData();addLog('系统','','删除所有套餐');save();render();toast('已删除所有套餐')}
+function clearAllProducts(){if(!cf('确认删除商品库中的所有商品？套餐和可选包里的商品内容、商品类兑换品、赠送商品类活动会一起清除。',function(){clearAllProducts()}))return;clearProductsData();addLog('系统','','删除所有商品');save();render();toast('已删除所有商品')}
+function clearAllLogs(){if(!cf('确认清空所有受理记录？清空后之前的业务将无法再撤单。',function(){clearAllLogs()}))return;clearLogsData();save();render();toast('已清空受理记录')}
+function clearAllCustomers(){if(!cf('确认删除所有客户？相关工单、账单、资金流水和积分流水也会一起删除，套餐、商品、活动等设置保留。',function(){clearAllCustomers()}))return;clearCustomers();addLog('系统','','清空所有客户');save();render();toast('已删除所有客户')}
+function byId(arr,id){for(var i=0;i<arr.length;i++)if(arr[i].id===id)return arr[i];return null}
+function num(v,d){v=parseFloat(v);return isNaN(v)?(d||0):v}
+
+/* ========== 示例数据 ========== */
+function seed(){
+ var m=today().slice(0,7),y=today().slice(0,4);
+ S={version:1,seq:1000,noSeq:0,month:m,
+  products:[],
+  plans:[],
+  addons:[],
+  campaigns:[
+   {id:'C1',name:'充100送20',type:'充值赠送',plans:[],start:y+'-01-01',end:y+'-12-31',threshold:100,value:20,pid:'',status:'启用',uses:0,total:0},
+   {id:'C3',name:'年末积分双倍',type:'积分翻倍',plans:[],start:y+'-11-01',end:y+'-12-31',threshold:0,value:2,pid:'',status:'启用',uses:0,total:0}
+  ],
+  pointRules:{perYuan:1,rechargePer100:10,tenurePerMonth:5,reviewCust:5},
+  agentRules:{assign:1,close:5,good:10,bad:-5,transfer:0},
+  mall:[
+   {id:'M1',name:'10元话费',kind:'话费',value:10,pid:'',qty:1,cost:1000,stock:999,on:true}
+  ],
+  agents:[
+   {id:'G1',name:'客服·小林（示例）',group:'一线客服',status:'在岗',points:0},
+   {id:'G2',name:'客服·小周（示例）',group:'一线客服',status:'在岗',points:0},
+   {id:'G3',name:'客服·老陈（示例）',group:'二线支撑',status:'在岗',points:0}
+  ],
+  customers:[],bills:[],txns:[],logs:[],pointLogs:[],agentLogs:[],tickets:[],campUses:[],monthRevenue:{},custCleared1:true,plansCleared1:true
+ };
+ var hm=m,hist=[1580,1622,1655,1610,1702];for(var k=0;k<5;k++){var yy=+hm.slice(0,4),mm=+hm.slice(5,7)-1;if(mm<1){mm=12;yy--}hm=yy+'-'+pad(mm);S.monthRevenue[hm]=hist[4-k]}
+ opDefaults(S);levelDefaults(S);addLog('系统','','初始化数据（套餐、商品为空，请在「商品库」「套餐管理」自行设置）');
+}
+
+/* ========== 记录 ========== */
+function addLog(type,cid,desc){var oi=opInfo();S.logs.unshift({no:bizNo('SL'),t:nowStr(),type:type,cid:cid||'',desc:desc,op:oi.op,opNo:oi.opNo||'',opId:oi.opId||'',dept:oi.dept});if(S.logs.length>3000)S.logs.length=3000}
+// 停机（含欠费停机）客户不能办理业务，只能充值/缴费、复机、销户
+var STOP_MSG='客户处于停机状态，不能办理业务（仅可充值/复机）';
+function isStopped(c){return !!c&&String(c.status||'').indexOf('停机')>=0}
+function assertNotStopped(c){if(isStopped(c))throw new Error(STOP_MSG)}
+// 信用额度：有效期留空=长期有效；可用额度=余额+有效信用额度；欠费不超过信用额度时仍为在网
+function creditOf(c){if(!c)return 0;var v=num(c.credit);if(!(v>0))return 0;if(c.creditExp&&today()>c.creditExp)return 0;return v}
+function availBal(c){return r2(num(c.balance)+creditOf(c))}
+function overCredit(c){return num(c.balance)< -creditOf(c)-1e-9}
+function creditText(c){var v=num(c.credit);if(!(v>0))return '未设置';return money(v)+'（'+(c.creditExp?'有效期至 '+c.creditExp+(today()>c.creditExp?'，已过期':''):'长期有效')+'）'}
+function setCredit(cid,amount,exp){return withUndo('信用额度',cid,function(){var c=byId(S.customers,cid);if(!c)throw new Error('请选择客户');if(c.status==='销户')throw new Error('已销户客户不能设置信用额度');
+ var v=r2(num(amount));if(!(v>=0))throw new Error('信用额度不能为负');if(exp&&!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(exp))throw new Error('有效期格式应为 YYYY-MM-DD');
+ var old=creditText(c);c.credit=v;c.creditExp=exp||'';addLog('信用额度',c.id,'信用额度：'+old+' → '+creditText(c)+'，可用额度 '+money(availBal(c)));
+ if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,'调整信用额度后欠费在额度内，自动复机')}
+ else if(c.status==='在网'&&overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'调整信用额度后欠费超出额度，欠费停机')}
+ save();return c})}
+// 信用额度到期检查：过期后欠费超出额度的在网客户转欠费停机
+function checkCredit(via){var n=0;S.customers.forEach(function(c){if(c.status==='在网'&&overCredit(c)){c.status='欠费停机';n++;addLog('停机',c.id,(via||'信用额度检查')+'：余额 '+money(c.balance)+'，超出有效信用额度（'+creditText(c)+'），欠费停机')}});if(n)save();return n}
+function doCheckCredit(){var n=checkCredit('信用额度检查');render();toast(n?'已检查，'+n+' 户转为欠费停机':'已检查，无需停机的客户')}
+function addTxn(cid,type,amount,desc){S.txns.unshift({no:bizNo('LS'),t:nowStr(),month:S.month,cid:cid,type:type,amount:r2(amount),desc:desc||''});if(S.txns.length>5000)S.txns.length=5000}
+function addRevenue(amt){S.monthRevenue[S.month]=r2((S.monthRevenue[S.month]||0)+amt)}
+function addPoints(c,delta,reason){delta=Math.round(delta);if(!delta)return;c.points=(c.points||0)+delta;S.pointLogs.unshift({t:nowStr(),month:S.month,cid:c.id,delta:delta,reason:reason,bal:c.points});if(S.pointLogs.length>5000)S.pointLogs.length=5000}
+function addAgentPoints(a,delta,reason){delta=Math.round(delta);if(!a||!delta)return;a.points=(a.points||0)+delta;S.agentLogs.unshift({t:nowStr(),aid:a.id,delta:delta,reason:reason,bal:a.points})}
+
+/* ========== 营销活动引擎 ========== */
+var CTYPES=['充值赠送','充值分月返还','满减','折扣','首月免费','积分翻倍','赠送商品'];
+var CTYPE_TIP={'充值分月返还':'充值金额≥门槛时赠送“优惠值”元（赠送总额），从充值次月起分“返还月数”个月、每月“返还日”返还到余额，金额平均分配，除不尽的零头放在最后一期','充值赠送':'充值金额≥门槛时赠送“优惠值”元话费','满减':'开户首月月租/订购可选包金额≥门槛时立减“优惠值”元','折扣':'开户首月月租/订购可选包金额≥门槛时打“优惠值”折（如 8 表示八折）','首月免费':'开户时首月月租全免','积分翻倍':'活动期内充值、订购、出账获得的积分乘以“优惠值”倍（如 2）','赠送商品':'开户或订购金额≥门槛时赠送所选商品，数量=优惠值（当月有效，计入额度）'};
+// 第三个参数传客户（开户时传 null=按默认级别）时，同时校验适用客户级别；不传则不校验级别
+function campActive(c,planId,cust){
+ if(c.status!=='启用')return false;var d=today();
+ if(c.start&&d<c.start)return false;if(c.end&&d>c.end)return false;
+ if(c.plans&&c.plans.length&&planId&&c.plans.indexOf(planId)<0)return false;
+ if(arguments.length>=3&&!campLevelOk(c,cust))return false;
+ if(arguments.length>=3&&!campLimitOk(c,cust))return false;
+ return true;
+}
+function campLevelOk(c,cust){if(!c.levels||!c.levels.length)return true;var lv=cust?levelOf(cust):defaultLevel();return !!lv&&c.levels.indexOf(lv.id)>=0}
+// 每客户可参加次数：maxTimes 为空/0 表示不限；撤单会删除参与记录，所以撤掉的不计数
+function campTimesUsed(c,cust){if(!cust||!cust.id)return 0;return (S.campUses||[]).filter(function(u){return u.cid===cust.id&&u.campId===c.id&&(c.type!=='积分翻倍'||u.scene==='手动参加'||u.pick)}).length}
+function campLimitOk(c,cust){var m=num(c.maxTimes);if(!(m>0)||!cust)return true;if(c.type==='积分翻倍'&&(cust.camps||[]).indexOf(c.id)>=0)return true;return campTimesUsed(c,cust)<m}
+function campLimitText(c){var m=num(c.maxTimes);return m>0?m+' 次':'不限'}
+function campLevelText(c){return c.levels&&c.levels.length?c.levels.map(function(id){var l=byId(S.levels||[],id);return l?l.name:id}).join('、'):'全部'}
+// trigger: 开户 | 充值 | 订购 | 出账（出账只取积分倍数）
+/* ---- 充值分月返还 ---- */
+function instMonths(c){return Math.max(1,Math.min(60,Math.round(num(c.months,10))))}
+function instDay(c){return Math.max(1,Math.min(28,Math.round(num(c.day,1))))}
+function instRuleText(c){return '分 '+instMonths(c)+' 个月返还，次月起每月 '+instDay(c)+' 日到账'}
+function makeInstall(c,amount){var n=instMonths(c),d=instDay(c),tot=r2(num(c.value)),per=Math.floor(tot/n*100)/100,items=[],m=S.month;
+ for(var i=0;i<n;i++){m=nextMonth(m);items.push({k:i+1,month:m,date:m+'-'+pad(d),amt:i<n-1?per:r2(tot-per*(n-1)),paid:false})}
+ return {id:uid('IN'),campId:c.id,campName:c.name,t:nowStr(),recharge:r2(amount),total:tot,months:n,day:d,items:items}}
+// 到期判断：返还日期 ≤ 今天（真实日期），或模拟账期已进入该期所在月份（出账切换账期后，新账期当月的返还到账）
+function instDue(it){return it.date<=today()||it.month<=S.month}
+function processInstalls(via){var n=0,sum=0;
+ S.customers.forEach(function(c){(c.installs||[]).forEach(function(p){p.items.forEach(function(it){
+  if(it.paid||it.cancel||!instDue(it))return;
+  if(c.status==='销户'){it.cancel=true;return}
+  it.paid=true;it.paidT=nowStr();it.via=via||'';c.balance=r2(c.balance+it.amt);n++;sum=r2(sum+it.amt);
+  addTxn(c.id,'活动返还',it.amt,p.campName+' 第 '+it.k+'/'+p.months+' 期返还（'+it.date+'）');
+  addLog('活动返还',c.id,p.campName+' 第 '+it.k+'/'+p.months+' 期返还 '+money(it.amt)+'（应返日期 '+it.date+'，'+(via||'自动')+'），余额 '+money(c.balance));
+  if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,'活动返还后欠费在信用额度内，自动复机')}
+ })})});
+ if(n)save();return {n:n,sum:sum}}
+function doProcessInstalls(){var r=processInstalls('手动执行到期返还');render();toast(r.n?'已返还 '+r.n+' 期，共 '+money(r.sum):'暂无到期的返还')}
+function installTable(c){var ps=c.installs||[];if(!ps.length)return '';
+ return ps.map(function(p){var paid=p.items.filter(function(i){return i.paid}),left=p.items.filter(function(i){return !i.paid&&!i.cancel});
+  return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px"><b>'+esc(p.campName)+'</b><span class="muted" style="font-size:12px">'+esc(p.t)+' 充值 '+money(p.recharge)+'，赠送 '+money(p.total)+'，分 '+p.months+' 个月、每月 '+p.day+' 日返还</span><span class="badge b-ok">已返 '+money(r2(paid.reduce(function(a,i){return a+i.amt},0)))+'</span><span class="badge">待返 '+money(r2(left.reduce(function(a,i){return a+i.amt},0)))+'</span></div>'+
+  '<div class="tbl-wrap"><table><tr><th>期数</th><th>返还日期</th><th class="right">金额</th><th>状态</th><th>到账时间</th></tr>'+p.items.map(function(i){return '<tr><td>第 '+i.k+' 期</td><td>'+esc(i.date)+'</td><td class="right">'+money(i.amt)+'</td><td>'+(i.paid?'<span class="badge b-ok">已返</span>':i.cancel?'<span class="badge">已取消（销户）</span>':'<span class="badge b-warn">待返</span>')+'</td><td>'+esc(i.paidT||'-')+'</td></tr>'}).join('')+'</table></div></div>'}).join('')}
+// 营销活动改为手动勾选：_campSel 为本笔业务勾选的活动；积分翻倍另外认客户已手动参加的活动（c.camps）
+var _campSel=null;
+function withCampSel(sel,fn){var o=_campSel;_campSel=Array.isArray(sel)?sel:[];try{return fn()}finally{_campSel=o}}
+function firstCamp(sel){return (sel&&sel.length)?[sel[0]]:[]}
+function campMutex(el){if(!el||!el.checked)return;var box=el.parentNode&&el.parentNode.parentNode;if(!box)return;[].forEach.call(box.querySelectorAll('input.campck'),function(x){if(x!==el)x.checked=false})}
+var CAMP_TRIG={'变更套餐':['满减','折扣','首月免费','赠送商品','积分翻倍'],'充值':['充值赠送','充值分月返还','积分翻倍'],'开户':['满减','折扣','首月免费','赠送商品','积分翻倍'],'订购':['满减','折扣','赠送商品','积分翻倍']};
+function campChoices(trigger,planId,cust){if(isStopped(cust))return [];return S.campaigns.filter(function(c){return campActive(c,planId,cust)&&(CAMP_TRIG[trigger]||[]).indexOf(c.type)>=0&&!(c.type==='积分翻倍'&&cust&&(cust.camps||[]).indexOf(c.id)>=0)})}
+function campBoxHtml(trigger,planId,cust,mutex){if(isStopped(cust))return '<span class="muted">客户已停机，不能参加营销活动（充值后自动复机再办理）</span>';var cs=campChoices(trigger,planId,cust);var en=cust?(cust.camps||[]).map(function(id){return byId(S.campaigns,id)}).filter(function(c){return c&&campActive(c,planId,cust)}):[];
+ return (cs.length?cs.map(function(c){return '<label style="display:flex;gap:6px;align-items:center;margin:4px 0;font-size:13px;color:inherit;cursor:pointer"><input type="checkbox" class="campck" value="'+esc(c.id)+'"'+(mutex?' onchange="campMutex(this)"':'')+' style="width:auto;margin:0"> '+esc(c.name)+' <span class="muted" style="font-size:12px">（'+esc(c.type)+'：'+esc(campRule(c))+'）</span></label>'}).join(''):'<span class="muted">无可参加的营销活动</span>')+
+ (en.length?'<div class="muted" style="font-size:12px;margin-top:4px">已参加（积分自动翻倍）：'+en.map(function(c){return esc(c.name)}).join('、')+'</div>':'')}
+function campField(boxId,trigger,planId,cust,mutex){return '<div class="f full"><label>参加营销活动（勾选后才生效，'+(mutex?'每次只能选1种，':'')+'默认不参加）</label><div id="'+boxId+'">'+campBoxHtml(trigger,planId,cust,mutex)+'</div></div>'}
+function preTickCamp(boxId,campId){if(!campId)return;var e=document.querySelector('#'+boxId+' input.campck[value="'+campId+'"]');if(e)e.checked=true}
+function campSel(boxId){return [].slice.call(document.querySelectorAll('#'+boxId+' input.campck:checked')).map(function(e){return e.value})}
+function refreshCampBox(boxId,trigger,cid){var c=byId(S.customers,cid);if($(boxId))$(boxId).innerHTML=campBoxHtml(trigger,c?c.planId:'',c)}
+// 只计算优惠金额（不记录），用于变更套餐前判断可用额度和弹窗显示
+function campDiscPreview(trigger,cust,planId,amount,sel){var d=0;if(isStopped(cust))return 0;S.campaigns.forEach(function(c){if((sel||[]).indexOf(c.id)<0||!campActive(c,planId,cust))return;var th=num(c.threshold),v=num(c.value),h=0;
+  if(c.type==='满减'&&amount>=th&&v>0)h=Math.min(v,amount-d);else if(c.type==='折扣'&&amount>=th&&v>0&&v<10)h=(amount-d)*(1-v/10);else if(c.type==='首月免费')h=amount-d;h=r2(h);if(h>0)d=r2(d+h)});return d}
+function applyCamps(trigger,cust,planId,amount){
+ var r={discount:0,bonus:0,gifts:[],mult:1,applied:[],multCamp:null,installs:[]};var sel=isStopped(cust)?[]:(_campSel||[]);
+ S.campaigns.forEach(function(c){
+  if(!campActive(c,planId,cust))return;var th=num(c.threshold),v=num(c.value),hit=0;
+  var picked=sel.indexOf(c.id)>=0;
+  if(c.type==='积分翻倍'){var enr=!!(cust&&(cust.camps||[]).indexOf(c.id)>=0);if(!picked&&!enr)return;if(v>r.mult){r.mult=v;r.multCamp=c;r.multPick=picked&&!enr}return}
+  if(trigger==='出账'||!picked)return;
+  if(c.type==='充值赠送'&&trigger==='充值'&&amount>=th&&v>0){r.bonus+=v;hit=v}
+  else if(c.type==='充值分月返还'&&trigger==='充值'&&amount>=th&&v>0){hit=r2(v);r.installs.push(c)}
+  else if(c.type==='满减'&&(trigger==='开户'||trigger==='订购'||trigger==='变更套餐')&&amount>=th&&v>0){hit=r2(Math.min(v,amount-r.discount));if(hit>0)r.discount+=hit;else return}
+  else if(c.type==='折扣'&&(trigger==='开户'||trigger==='订购'||trigger==='变更套餐')&&amount>=th&&v>0&&v<10){hit=r2((amount-r.discount)*(1-v/10));if(hit>0)r.discount+=hit;else return}
+  else if(c.type==='首月免费'&&(trigger==='开户'||trigger==='变更套餐')){hit=r2(amount-r.discount);if(hit>0)r.discount+=hit;else return}
+  else if(c.type==='赠送商品'&&(trigger==='开户'||trigger==='订购'||trigger==='变更套餐')&&amount>=th&&c.pid){var p=byId(S.products,c.pid);if(!p)return;r.gifts.push({pid:p.id,qty:v||1,month:S.month,from:c.name,src:'营销活动'});hit=r2(p.price*(v||1))}
+  else return;
+  c.uses++;c.total=r2(c.total+hit);r.applied.push(c.name+'（'+money(hit)+'）');
+  addTxn(cust?cust.id:'','活动优惠',hit,c.name+' · '+trigger);
+  var gd='';if(c.type==='充值分月返还')gd='充值 '+money(amount)+'，赠送 '+money(hit)+'，'+instRuleText(c);if(c.type==='赠送商品'){var gp=byId(S.products,c.pid);gd='赠送 '+(gp?gp.name:'商品')+' ×'+(v||1)+'份（价值 '+money(hit)+'）'}
+  recCampUse(cust,c,trigger,hit,gd||({'充值赠送':'赠送话费 ','满减':'立减 ','折扣':'折扣优惠 ','首月免费':'首月月租减免 '}[c.type]||'优惠 ')+money(hit));
+ });
+ r.discount=r2(r.discount);return r;
+}
+function recCampUse(cust,c,scene,amount,desc){if(!cust||!cust.id)return;if(!Array.isArray(S.campUses))S.campUses=[];
+ S.campUses.unshift({id:uid('CU'),cid:cust.id,campId:c.id,campName:c.name,type:c.type,t:nowStr(),month:S.month,scene:scene,desc:desc,amount:r2(amount)});if(S.campUses.length>5000)S.campUses.length=5000}
+// 兼容旧数据/导入数据：补字段，并从资金流水回填活动参与记录
+function renameAddonDeep(o){if(!o||typeof o!=='object')return;for(var k in o){if(!Object.prototype.hasOwnProperty.call(o,k))continue;var v=o[k];if(typeof v==='string'){if(v.indexOf('增值')>=0)o[k]=v.replace(/增值可选包|增值包/g,'可选包')}else if(v&&typeof v==='object')renameAddonDeep(v)}}
+function renameBanliDeep(o){if(!o||typeof o!=='object')return;for(var k in o){if(!Object.prototype.hasOwnProperty.call(o,k))continue;var v=o[k];if(typeof v==='string'){if(v.indexOf('直接办理')>=0)o[k]=v.replace(/直接办理/g,'办理')}else if(v&&typeof v==='object')renameBanliDeep(v)}}
+function ensureFields(o){o=o||S;if(!o)return;bbDefaults(o);(o.campaigns||[]).forEach(function(cp){if(!Array.isArray(cp.levels))cp.levels=[]});if(!o.addonRenamed1){renameAddonDeep(o);o.addonRenamed1=true}if(!o.banliRenamed1){renameBanliDeep(o);o.banliRenamed1=true}if(!o.dinggouScene1){(o.campUses||[]).forEach(function(u){if(u.scene==='办理')u.scene='订购'});o.dinggouScene1=true}opDefaults(o);levelDefaults(o);(o.customers||[]).forEach(function(c){if(c.idno==='110***********0000（示例）'||c.idno==='（未填）')c.idno=''});delete o.trails;if(Array.isArray(o.logs))o.logs=o.logs.filter(function(l){return l.type!=='轨迹'});
+ if(!Array.isArray(o.campUses)){o.campUses=[];(o.txns||[]).forEach(function(t){if(t.type!=='活动优惠'||!t.cid)return;var parts=String(t.desc||'').split(' · ');var name=parts[0],scene=parts[1]||'-';
+  var c=(o.campaigns||[]).filter(function(x){return x.name===name})[0];
+  o.campUses.push({id:'CUB'+o.campUses.length,cid:t.cid,campId:c?c.id:'',campName:name,type:c?c.type:'',t:t.t,month:t.month,scene:scene,desc:(c&&c.type==='积分翻倍'?'积分翻倍':'优惠 '+money(t.amount))+'（由历史流水回填）',amount:r2(t.amount)})})}}
+// 发放积分，自动套用积分翻倍活动
+function grantPoints(cust,base,reason){
+ var r=applyCamps('出账',cust,cust.planId,0);var pts=Math.floor(base*r.mult);
+ if(pts<=0)return 0;
+ addPoints(cust,pts,reason+(r.mult>1?'（'+r.multCamp.name+' ×'+r.mult+'）':''));
+ if(r.multCamp){r.multCamp.uses++;r.multCamp.extraPts=(r.multCamp.extraPts||0)+(pts-Math.floor(base));
+  var sc=reason.indexOf('变更套餐')>=0?'变更套餐':reason.indexOf('充值')>=0?'充值':reason.indexOf('开户')>=0?'开户':reason.indexOf('订购')>=0?'订购':'出账';
+  recCampUse(cust,r.multCamp,sc,0,'积分 ×'+r.mult+'：'+reason+'，实得 '+pts+' 分（多发 '+(pts-Math.floor(base))+' 分）');if(r.multPick&&S.campUses[0]&&S.campUses[0].cid===cust.id)S.campUses[0].pick=true}
+ return pts;
+}
+function earn(cust,amount,reason){return grantPoints(cust,amount*num(S.pointRules.perYuan),reason)}
+
+/* ========== 额度计算 ========== */
+var TYPEKEY={'流量':'data','语音':'voice','短信':'sms'};
+var QUNIT={data:'GB',voice:'分钟',sms:'条'};
+// 单位里带数字时（如“100GB”“1000分钟”“500MB”）按数字计入额度，并换算到基础单位：流量 GB、通话 分钟、短信 条
+function unitFactor(p){var u=String(p&&p.unit||'').trim(),m=u.match(/^([0-9]+(?:\.[0-9]+)?)\s*(.*)$/),n=m?num(m[1],1):1,rest=(m?m[2]:u).trim();
+ var k=TYPEKEY[p&&p.type],f=1;
+ if(k==='data'){if(/^(MB|M|兆)$/i.test(rest))f=1/1024;else if(/^(TB|T)$/i.test(rest))f=1024;else if(/^(KB|K)$/i.test(rest))f=1/1048576}
+ else if(k==='voice'){if(/^(小时|h)$/i.test(rest))f=60}
+ return n*f}
+function itemAmt(it,p){return num(it.qty)*num(p.qty,1)*unitFactor(p)}
+// 按来源列出每个计入额度的商品：套餐 → 可选包 → 赠品（用量也按这个顺序扣减）
+function quotaItems(c){var out=[],pl=byId(S.plans,c.planId);
+ function add(items,src,srcName){(items||[]).forEach(function(it){var p=byId(S.products,it.pid);if(!p||!TYPEKEY[p.type])return;out.push({key:TYPEKEY[p.type],name:p.name,src:src,srcName:srcName,amt:r2(itemAmt(it,p))})})}
+ if(pl)add(pl.items,'套餐',pl.name);
+ (c.addons||[]).forEach(function(a){var ad=byId(S.addons,a.aid);if(ad)add(ad.items,'可选包',ad.name)});
+ (c.gifts||[]).forEach(function(g){if(g.month===S.month)add([g],'赠品',g.from||'赠品')});
+ return out}
+function quota(c){var q={data:0,voice:0,sms:0};quotaItems(c).forEach(function(x){q[x.key]+=x.amt});q.data=r2(q.data);q.voice=r2(q.voice);q.sms=r2(q.sms);return q}
+// 用量分摊：按 套餐 → 可选包 → 赠品 顺序依次扣减，超出部分为超额
+function usageBreakdown(c,key){var left=num(c.usage&&c.usage[key]),rows=quotaItems(c).filter(function(x){return x.key===key}).map(function(x){var u=r2(Math.min(left,x.amt));left=r2(left-u);return {name:x.name,src:x.src,srcName:x.srcName,amt:x.amt,used:u}});return {rows:rows,over:r2(Math.max(0,left))}}
+function validityText(p){var v=p&&p.validity;if(v===''||v==null||isNaN(parseFloat(v))||parseFloat(v)<=0)return '不限';return parseFloat(v)+' 个月'}
+// 宽带 / 固定电话可选包（不影响主套餐）
+var ADDON_CATS=['通用','宽带','固定电话'];
+function addonCat(a){return a&&ADDON_CATS.indexOf(a.cat)>=0?a.cat:'通用'}
+function addonSpec(a){var k=addonCat(a);if(k==='宽带')return '速率 '+(a.speed||'-');if(k==='固定电话')return '含本地通话 '+num(a.minutes)+' 分钟';return itemsText(a.items)}
+function bbDefaults(o){if(!Array.isArray(o.addons))o.addons=[];o.addons.forEach(function(a){if(ADDON_CATS.indexOf(a.cat)<0)a.cat='通用'});
+ if(!o.broadbandSeed1){[{id:'ABB100',name:'宽带100M',cat:'宽带',speed:'100M',price:50},{id:'ABB300',name:'宽带300M',cat:'宽带',speed:'300M',price:80},{id:'ABB1000',name:'宽带1000M',cat:'宽带',speed:'1000M',price:120},{id:'AFX15',name:'固话基础版',cat:'固定电话',minutes:100,price:15},{id:'AFX30',name:'固话畅聊版',cat:'固定电话',minutes:500,price:30}].forEach(function(x){if(o.addons.some(function(a){return a.id===x.id}))return;o.addons.push(Object.assign({cycle:'包月',status:'在售',items:[],desc:x.cat==='宽带'?'家庭宽带，按月计费':'固定电话，按月计费'},x))});o.broadbandSeed1=true}
+ if(!o.bbSeq)o.bbSeq=0;if(!o.fxSeq)o.fxSeq=0}
+function genBbAcct(c){S.bbSeq=(S.bbSeq||0)+1;return 'KD'+String(c.phone||'').replace(/[^0-9]/g,'').slice(-4)+String(100000+S.bbSeq).slice(1)}
+function usedFxNos(){var r={};S.customers.forEach(function(c){(c.addons||[]).forEach(function(x){if(x.fxNo)r[x.fxNo]=1})});return r}
+function genFxNo(){var u=usedFxNos(),n;do{S.fxSeq=(S.fxSeq||0)+1;n='0755-6'+String(1000000+S.fxSeq).slice(1)}while(u[n]);return n}
+function addonExtraText(x){return [x.bbAcct?'宽带账号 '+x.bbAcct:'',x.fxNo?'固话号码 '+x.fxNo:'',x.addr?'安装地址 '+x.addr:''].filter(Boolean).join('，')}
+function amtText(n,unit){n=r2(n);unit=String(unit||'').trim();if(!unit)return String(n);if(n===1)return unit;return (/^[0-9.]/.test(unit)?n+'×'+unit:n+' '+unit)}
+function specText(p){var u=String(p.unit||'').trim();if(p.qty===''||p.qty==null||num(p.qty)===1)return u||(p.qty===''||p.qty==null?'-':String(p.qty));return amtText(num(p.qty),u)}
+function itemsText(items){return (items||[]).map(function(it){var p=byId(S.products,it.pid);return p?p.name+' '+amtText(num(it.qty)*num(p.qty,1),p.unit):'(已删除商品)'}).join('、')}
+function statusBadge(s){var m={'正常':'b-ok','失效':'','停机':'b-warn','欠费停机':'b-bad','销户':'','启用':'b-ok','停用':'','在售':'b-ok','下架':'','待指派':'b-warn','处理中':'b-pri','已关闭':'','在岗':'b-ok','离岗':''};return '<span class="badge '+(m[s]||'')+'">'+esc(s)+'</span>'}
+
+/* ========== 业务操作 ========== */
+function openAccount(o){return withUndo('开户',null,function(){return withCampSel(o.camps,function(){return openAccount_raw(o)})})}
+function openAccount_raw(o){
+ var pl=byId(S.plans,o.planId);if(!pl)throw new Error('请选择套餐');
+ if(!o.name)throw new Error('请填写客户姓名');
+ if(o.phone&&S.customers.some(function(c){return c.phone===o.phone&&c.status!=='销户'}))throw new Error('该号码已被占用');
+ var c={id:'U'+(++S.seq),name:o.name,phone:o.phone||('138-0000-'+String(S.seq).slice(-4)),idno:o.idno||'',planId:pl.id,status:'在网',balance:r2(num(o.prepay)),points:0,addons:[],gifts:[],openDate:today(),usage:{data:0,voice:0,sms:0},paidMonth:S.month,levelId:(byId(S.levels||[],o.levelId)||defaultLevel()||{}).id||'',levelHist:[],credit:r2(Math.max(0,num(o.credit))),creditExp:o.creditExp||''};
+ S.customers.push(c);
+ addTxn(c.id,'预存',c.balance,'开户预存');addLog('开户',c.id,'开户 '+c.name+' '+c.phone+'，套餐：'+pl.name+'，预存 '+money(c.balance)+(c.credit?'，信用额度 '+creditText(c):''));
+ var r=applyCamps('开户',c,pl.id,pl.fee);var fee=r2(Math.max(0,pl.fee-r.discount));
+ c.gifts=c.gifts.concat(r.gifts);
+ c.balance=r2(c.balance-fee);addTxn(c.id,'扣费',-fee,'首月月租 '+pl.name+(r.discount?'（优惠 '+money(r.discount)+'）':''));addRevenue(fee);
+ S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:[{name:'首月月租（'+pl.name+'）',amt:pl.fee}].concat(r.discount?[{name:'活动优惠',amt:-r.discount}]:[]),total:fee,note:'开户'});
+ if(r.applied.length)addLog('营销活动',c.id,'开户命中活动：'+r.applied.join('；'));
+ if(fee>0)earn(c,fee,'开户消费积分');
+ if(overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'开户后余额不足，欠费停机')}
+ save();return {cust:c,fee:fee,applied:r.applied};
+}
+function recharge(cid,amount,camps){return withUndo('充值',cid,function(){return withCampSel(camps,function(){return recharge_raw(cid,amount)})})}
+function recharge_raw(cid,amount){
+ var c=byId(S.customers,cid);amount=r2(num(amount));if(!c)throw new Error('请选择客户');if(amount<=0)throw new Error('金额需大于0');if(c.status==='销户')throw new Error('已销户客户不可充值');
+ var r=applyCamps('充值',c,c.planId,amount);
+ c.balance=r2(c.balance+amount+r.bonus);addTxn(c.id,'充值',amount,'充值缴费');if(r.bonus)addTxn(c.id,'赠送',r.bonus,'活动赠送话费');
+ var insts=r.installs.map(function(cp){var p=makeInstall(cp,amount);var u=(S.campUses||[]).filter(function(x){return x.cid===c.id&&x.campId===cp.id&&!x.instId})[0];if(u)u.instId=p.id;return p});if(insts.length)c.installs=(c.installs||[]).concat(insts);
+ var base=Math.floor(amount/100)*num(S.pointRules.rechargePer100);var pts=base>0?grantPoints(c,base,'充值奖励积分'):0;
+ var msg='充值 '+money(amount)+(r.bonus?'，活动赠送 '+money(r.bonus):'')+insts.map(function(p){return '，'+p.campName+' 赠送 '+money(p.total)+' 分 '+p.months+' 个月返还（首期 '+p.items[0].date+'）'}).join('')+(pts?'，奖励 '+pts+' 积分':'')+'，余额 '+money(c.balance);
+ addLog('充值',c.id,msg+(r.applied.length?'；命中：'+r.applied.join('；'):''));
+ if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,c.balance>=0?'缴清欠费，自动复机':'欠费在信用额度内，自动复机');msg+='，已自动复机'}
+ save();return {msg:msg,cust:c};
+}
+function changePlan(cid,planId,camps){return withUndo('变更套餐',cid,function(){return withCampSel(firstCamp(camps),function(){return changePlan_raw(cid,planId)})})}
+function changePlan_raw(cid,planId){var c=byId(S.customers,cid),pl=byId(S.plans,planId);if(!c||!pl)throw new Error('参数错误');assertNotStopped(c);if(c.planId===planId)throw new Error('与当前套餐相同');var old=byId(S.plans,c.planId);var fee0=r2(num(pl.fee));var fee=r2(Math.max(0,fee0-campDiscPreview('变更套餐',c,pl.id,fee0,_campSel)));if(fee>0&&availBal(c)<fee)throw new Error('可用额度不足（余额 '+money(c.balance)+(creditOf(c)?' + 信用额度 '+money(creditOf(c)):'')+'），立即生效需扣除套餐费 '+money(fee)+'，请先充值或选择下周期生效');var hadP=c.pendingPlan;delete c.pendingPlan;c.planId=pl.id;
+ var r=applyCamps('变更套餐',c,pl.id,fee0);fee=r2(Math.max(0,fee0-r.discount));c.gifts=(c.gifts||[]).concat(r.gifts);
+ if(fee0>0){c.balance=r2(c.balance-fee);addTxn(c.id,'扣费',-fee,'套餐费（变更套餐立即生效）：'+pl.name+(r.discount?'（优惠 '+money(r.discount)+'）':''));addRevenue(fee);S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:[{name:'套餐费（变更套餐立即生效）：'+pl.name,amt:fee0}].concat(r.discount?[{name:'活动优惠',amt:-r.discount}]:[]),total:fee,note:'变更套餐'});if(fee>0)earn(c,fee,'变更套餐消费积分')}
+ if(r.applied.length)addLog('营销活动',c.id,'变更套餐命中活动：'+r.applied.join('；'));c.paidMonth=S.month;c.planFeePaidMonth=S.month;addLog('变更套餐',c.id,(old?old.name:'-')+' → '+pl.name+'（立即生效，本月额度按新套餐，已扣除套餐费 '+money(fee)+'，本月出账不再收取月租，余额 '+money(c.balance)+'）'+(hadP?'；原预约的下周期套餐已取消':''));save()}
+// 下周期生效：预约次月1日生效，出账切换账期时（或打开页面时已到生效日）自动生效
+function nextCycleDate(){return nextMonth(S.month)+'-01'}
+function schedulePlan(cid,planId,camps){return withUndo('变更套餐',cid,function(){var c=byId(S.customers,cid),pl=byId(S.plans,planId);if(!c||!pl)throw new Error('参数错误');if(c.status==='销户')throw new Error('已销户客户不能办理');assertNotStopped(c);
+ if(c.planId===planId)throw new Error('与当前套餐相同');var old=byId(S.plans,c.planId),prev=c.pendingPlan?byId(S.plans,c.pendingPlan.planId):null;var oi=opInfo();
+ var okIds=campChoices('变更套餐',pl.id,c).map(function(x){return x.id});var cps=firstCamp((camps||[]).filter(function(id){return okIds.indexOf(id)>=0}));
+ c.pendingPlan={planId:pl.id,effDate:nextCycleDate(),t:nowStr(),op:oi.op,camps:cps};
+ addLog('变更套餐',c.id,'变更套餐（下周期生效）：'+(old?old.name:'-')+' → '+pl.name+'，'+c.pendingPlan.effDate+' 生效'+(cps.length?'，参加活动：'+cps.map(function(id){var x=byId(S.campaigns,id);return x?x.name:id}).join('、')+'（生效时计算）':'')+(prev?'；替换原预约 '+prev.name:''));save();return c.pendingPlan})}
+function cancelPendingPlan(cid){return withUndo('取消预约',cid,function(){var c=byId(S.customers,cid);if(!c||!c.pendingPlan)throw new Error('没有待生效的套餐');var pl=byId(S.plans,c.pendingPlan.planId);var d=c.pendingPlan.effDate;delete c.pendingPlan;addLog('变更套餐',c.id,'取消预约：下周期套餐 '+(pl?pl.name:'-')+'（'+d+' 生效）已取消');save()})}
+function applyPendingPlans(via,refDate){var n=0;S.customers.forEach(function(c){var p=c.pendingPlan;if(!p||c.status==='销户')return;if(p.effDate>refDate)return;var pl=byId(S.plans,p.planId),old=byId(S.plans,c.planId);delete c.pendingPlan;
+  if(!pl){addLog('套餐预约生效',c.id,'预约的套餐已被删除，预约作废');return}
+  c.planId=pl.id;n++;var fee0=r2(num(pl.fee)),fm=p.effDate.slice(0,7),fee=fee0,cr=null;
+  withCampSel(firstCamp(p.camps||[]),function(){cr=applyCamps('变更套餐',c,pl.id,fee0);fee=r2(Math.max(0,fee0-cr.discount));c.gifts=(c.gifts||[]).concat(cr.gifts);
+   if(fee0>0){c.balance=r2(c.balance-fee);addTxn(c.id,'扣费',-fee,'套餐费（预约套餐生效）：'+pl.name+(cr.discount?'（优惠 '+money(cr.discount)+'）':''));addRevenue(fee);S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:fm,cid:c.id,items:[{name:'套餐费（预约套餐生效）：'+pl.name,amt:fee0}].concat(cr.discount?[{name:'活动优惠',amt:-cr.discount}]:[]),total:fee,note:'预约套餐生效'});if(fee>0)earn(c,fee,'变更套餐（预约生效）消费积分')}});
+  if(cr&&cr.applied.length)addLog('营销活动',c.id,'预约套餐生效命中活动：'+cr.applied.join('；'));
+  c.paidMonth=fm;c.planFeePaidMonth=fm;
+  addLog('套餐预约生效',c.id,'套餐预约生效（'+via+'）：'+(old?old.name:'-')+' → '+pl.name+'，'+p.effDate+' 起按新套餐，扣除套餐费 '+money(fee)+'，余额 '+money(c.balance)+'（预约：'+p.t+' '+(p.op||'')+'）');
+  if(c.status==='在网'&&overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'预约套餐生效扣费后余额 '+money(c.balance)+'，超出信用额度，欠费停机')}});if(n)save();return n}
+function pendingPlanText(c){var p=c&&c.pendingPlan;if(!p)return '';var pl=byId(S.plans,p.planId);return (pl?pl.name:'(已删除套餐)')+'（'+p.effDate+' 生效）'}
+function setStatus(cid,st){if(st==='销户')return setStatus_raw(cid,st);return withUndo(st==='在网'?'复机':'停机',cid,function(){return setStatus_raw(cid,st)})}
+function setStatus_raw(cid,st){var c=byId(S.customers,cid);if(!c)return;var old=c.status;
+ if(st==='在网'&&overCredit(c))throw new Error('欠费超出信用额度，请先充值');
+ c.status=st;if(st==='销户'){c.addons=[];if(Array.isArray(S.campUses))S.campUses=S.campUses.filter(function(u){return u.cid!==c.id})}
+ addLog(st==='销户'?'销户':(st==='在网'?'复机':'停机'),c.id,old+' → '+st+(st==='销户'?'，余额 '+money(c.balance)+' 结清（模拟）':''));save()}
+function orderAddon(cid,aid,camps,extra){return withUndo('订购',cid,function(){return withCampSel(camps,function(){return orderAddon_raw(cid,aid,extra)})})}
+function joinCamps(cid,ids){return withUndo('参加活动',cid,function(){var c=byId(S.customers,cid);if(!c)throw new Error('请选择客户');assertNotStopped(c);if(c.status==='销户')throw new Error('已销户客户不可参加活动');ids=(ids||[]).filter(function(id){var cp=byId(S.campaigns,id);return cp&&cp.type==='积分翻倍'&&(c.camps||[]).indexOf(id)<0&&campLimitOk(cp,c)});if(!ids.length)throw new Error('请勾选要参加的活动');
+ c.camps=(c.camps||[]).concat(ids);var names=ids.map(function(id){var cp=byId(S.campaigns,id);recCampUse(c,cp,'手动参加',0,'手动参加活动（之后积分按 ×'+num(cp.value)+' 发放）');return cp.name});addLog('营销活动',c.id,'手动参加活动：'+names.join('、'));save();return names})}
+function quitCamp(cid,id){return withUndo('退出活动',cid,function(){var c=byId(S.customers,cid),cp=byId(S.campaigns,id);assertNotStopped(c);c.camps=(c.camps||[]).filter(function(x){return x!==id});addLog('营销活动',c.id,'退出活动：'+(cp?cp.name:id));save()})}
+function orderAddon_raw(cid,aid,extra){
+ var c=byId(S.customers,cid),a=byId(S.addons,aid);if(!c||!a)throw new Error('请选择可选包');assertNotStopped(c);if(c.status!=='在网')throw new Error('仅在网客户可订购');
+ var cat=addonCat(a),ex={};extra=extra||{};if(cat!=='通用'){var addr=String(extra.addr||'').trim();if(!addr)throw new Error('请填写安装地址');ex.addr=addr;
+  if(cat==='固定电话'){var fx=String(extra.fxNo||'').trim();if(fx){if(!/^[0-9][0-9-]{5,15}$/.test(fx))throw new Error('固话号码格式不正确（数字，可含 -）');if(usedFxNos()[fx])throw new Error('固话号码 '+fx+' 已被占用')}}}
+ if((c.addons||[]).some(function(x){return x.aid===aid}))throw new Error('已订购该可选包');
+ var bal=c.balance;var preview=r2(a.price);if(availBal(c)<=0&&preview>0)throw new Error('可用额度不足（余额+信用额度），请先充值');
+ var r=applyCamps('订购',c,c.planId,a.price);var fee=r2(Math.max(0,a.price-r.discount));
+ if(cat==='宽带')ex.bbAcct=genBbAcct(c);if(cat==='固定电话')ex.fxNo=String(extra.fxNo||'').trim()||genFxNo();
+ c.balance=r2(c.balance-fee);c.addons.push(Object.assign({aid:a.id,paid:S.month,month:S.month,t:nowStr()},ex));c.gifts=(c.gifts||[]).concat(r.gifts);
+ addTxn(c.id,'扣费',-fee,'订购 '+a.name+(r.discount?'（优惠 '+money(r.discount)+'）':''));addRevenue(fee);
+ S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:[{name:'可选包：'+a.name,amt:a.price}].concat(r.discount?[{name:'活动优惠',amt:-r.discount}]:[]),total:fee,note:'订购'});
+ addLog('订购',c.id,'订购'+(cat!=='通用'?cat:'')+'可选包 '+a.name+'（'+a.cycle+(cat!=='通用'?'，'+addonExtraText(ex):'')+'），实扣 '+money(fee)+(r.applied.length?'；命中：'+r.applied.join('；'):''));
+ if(fee>0)earn(c,fee,'订购消费积分');
+ if(overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'订购后欠费超出信用额度，欠费停机')}
+ save();return fee;
+}
+function cancelAddon(cid,aid){return withUndo('退订',cid,function(){return cancelAddon_raw(cid,aid)})}
+function cancelAddon_raw(cid,aid){var c=byId(S.customers,cid);assertNotStopped(c);var old=(c.addons||[]).filter(function(x){return x.aid===aid})[0];c.addons=c.addons.filter(function(x){return x.aid!==aid});var a=byId(S.addons,aid);addLog('退订',c.id,'退订'+(a&&addonCat(a)!=='通用'?addonCat(a):'')+'可选包 '+(a?a.name:aid)+(old&&addonExtraText(old)?'（'+addonExtraText(old)+'）':'')+'（当月已扣费用不退，模拟）');save()}
+function simUsage(cid,u){var c=byId(S.customers,cid);if(!c||c.status!=='在网')return false;c.usage.data=r2(c.usage.data+num(u.data));c.usage.voice=Math.round(c.usage.voice+num(u.voice));c.usage.sms=Math.round(c.usage.sms+num(u.sms));return true}
+function randomUsageAll(){var n=0;S.customers.forEach(function(c){if(c.status!=='在网')return;var q=quota(c);
+ simUsage(c.id,{data:r2(q.data*(0.4+Math.random()*0.9)),voice:Math.round(q.voice*(0.3+Math.random()*0.9)),sms:Math.round(q.sms*Math.random()*0.6)});n++});
+ addLog('用量','','随机生成本月用量（'+n+' 位在网客户）');save();return n}
+function runBilling(){
+ var m=S.month,cnt=0,total=0,stopped=0;
+ S.customers.forEach(function(c){
+  if(c.status==='销户')return;var pl=byId(S.plans,c.planId);var items=[];
+  if(pl&&c.paidMonth!==m)items.push({name:'月租（'+pl.name+'）',amt:pl.fee});
+  (c.addons||[]).forEach(function(x){var a=byId(S.addons,x.aid);if(a&&x.paid!==m){items.push({name:'可选包：'+a.name,amt:a.price});x.paid=m}});
+  var q=quota(c),ov=pl?pl.over:{data:0,voice:0,sms:0};
+  var od=r2(Math.max(0,c.usage.data-q.data)),ovc=Math.max(0,c.usage.voice-q.voice),os=Math.max(0,c.usage.sms-q.sms);
+  if(od>0)items.push({name:'超额流量 '+od+'GB（按 '+Math.ceil(od)+'GB 计）× '+money(ov.data),amt:r2(Math.ceil(od)*num(ov.data))});
+  if(ovc>0)items.push({name:'超额通话 '+ovc+'分钟 × '+money(ov.voice),amt:r2(ovc*num(ov.voice))});
+  if(os>0)items.push({name:'超额短信 '+os+'条 × '+money(ov.sms),amt:r2(os*num(ov.sms))});
+  var sum=r2(items.reduce(function(s,i){return s+i.amt},0));
+  S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:m,cid:c.id,items:items.length?items:[{name:'本月无新增费用（月租已在开户时收取）',amt:0}],total:sum,note:'月末出账',usage:{data:c.usage.data,voice:c.usage.voice,sms:c.usage.sms},quota:q});
+  if(sum>0){c.balance=r2(c.balance-sum);addTxn(c.id,'扣费',-sum,m+' 月账单');addRevenue(sum);earn(c,sum,m+' 月消费积分')}
+  if(c.status==='在网'&&num(S.pointRules.tenurePerMonth)>0)addPoints(c,num(S.pointRules.tenurePerMonth),'在网时长奖励');
+  if(overCredit(c)&&c.status==='在网'){c.status='欠费停机';stopped++;addLog('停机',c.id,'出账后余额 '+money(c.balance)+(creditOf(c)?'，超出信用额度 '+money(creditOf(c)):'')+'，欠费停机')}
+  cnt++;total+=sum;
+ });
+ addLog('出账','',m+' 月出账完成：'+cnt+' 户，应收 '+money(total)+'，新增欠费停机 '+stopped+' 户');
+ S.customers.forEach(function(c){c.usage={data:0,voice:0,sms:0};c.addons=(c.addons||[]).filter(function(x){var a=byId(S.addons,x.aid);return a&&a.cycle==='包月'});c.gifts=(c.gifts||[]).filter(function(g){return g.month>m})});
+ var lr=runLevelEval(m,'出账自动评估');
+ S.month=nextMonth(m);addLog('账期','','账期切换至 '+S.month);applyPendingPlans('月末出账',S.month+'-01');var ir=processInstalls('月末出账');
+ save();return {cnt:cnt,total:r2(total),stopped:stopped,month:m,level:lr};
+}
+function redeem(cid,mid){return withUndo('积分兑换',cid,function(){return redeem_raw(cid,mid)})}
+function redeem_raw(cid,mid){
+ var c=byId(S.customers,cid),it=byId(S.mall,mid);if(!c||!it)throw new Error('请选择客户和兑换品');assertNotStopped(c);if(!it.on)throw new Error('该兑换品已下架');
+ if(it.stock<=0)throw new Error('库存不足');if(c.points<it.cost)throw new Error('积分不足（需 '+it.cost+'，现有 '+c.points+'）');
+ addPoints(c,-it.cost,'积分兑换：'+it.name);it.stock--;
+ if(it.kind==='话费'){c.balance=r2(c.balance+num(it.value));addTxn(c.id,'积分兑换',num(it.value),'兑换话费 '+it.name);if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,'积分兑换话费后自动复机')}}
+ else if(it.pid){c.gifts=(c.gifts||[]).concat([{pid:it.pid,qty:num(it.qty,1),month:S.month,from:'积分兑换',src:'积分兑换'}])}
+ addLog('积分兑换',c.id,'消耗 '+it.cost+' 积分兑换 '+it.name);save();
+}
+function createTicket(cid,title,cat,desc){if(!cid)throw new Error('请选择客户');if(cat!=='撤单申请'&&cat!=='停复机'&&isStopped(byId(S.customers,cid)))throw new Error('客户处于停机状态，只能提交“停复机”或“撤单申请”工单');if(!title)throw new Error('请填写标题');var t={id:'T'+(++S.seq),no:bizNo('GD'),t:nowStr(),cid:cid,title:title,cat:cat,status:'待指派',agentId:'',flow:[{t:nowStr(),op:opName(),dept:opDept(),text:'工单创建'+(desc?'：'+desc:'')}],rating:0};S.tickets.unshift(t);addLog('工单',cid,'新建工单 '+t.no+' '+title);save();return t}
+function assignTicket(tid,aid,note){var t=byId(S.tickets,tid),a=byId(S.agents,aid);if(!t||!a)throw new Error('请选择客服');if(t.status==='已关闭')throw new Error('工单已关闭');
+ var isTransfer=!!t.agentId&&t.agentId!==aid;var old=byId(S.agents,t.agentId);
+ t.agentId=aid;t.status='处理中';t.flow.push({t:nowStr(),op:opName(),dept:opDept(),text:(isTransfer?'流转：'+(old?old.name:'')+' → ':'指派给 ')+a.name+(note?'；备注：'+note:'')});
+ if(isTransfer){addAgentPoints(old,num(S.agentRules.transfer),'工单流转转出 '+t.no);addAgentPoints(a,num(S.agentRules.assign),'接单（流转）'+t.no)}else addAgentPoints(a,num(S.agentRules.assign),'接单 '+t.no);
+ addLog('工单',t.cid,(isTransfer?'流转':'指派')+'工单 '+t.no+' → '+a.name);save()}
+function closeTicket(tid,rating,note){var t=byId(S.tickets,tid);if(!t)return;if(!t.agentId)throw new Error('请先指派客服');rating=parseInt(rating,10)||0;
+ var a=byId(S.agents,t.agentId);t.status='已关闭';t.rating=rating;t.flow.push({t:nowStr(),op:opName(),dept:opDept(),text:'关闭工单，客户评价 '+(rating?rating+' 星':'未评价')+(note?'；'+note:'')});
+ addAgentPoints(a,num(S.agentRules.close),'结单 '+t.no);
+ if(rating>=4)addAgentPoints(a,num(S.agentRules.good),'好评（'+rating+'星）'+t.no);
+ if(rating>0&&rating<=2)addAgentPoints(a,num(S.agentRules.bad),'差评（'+rating+'星）'+t.no);
+ var c=byId(S.customers,t.cid);if(c&&rating>0)addPoints(c,num(S.pointRules.reviewCust),'工单评价奖励');
+ addLog('工单',t.cid,'关闭工单 '+t.no+'，评价 '+(rating||'未评价')+(rating?' 星':''));save()}
+/* ========== 弹窗 ========== */
+var modalSubmit=null;
+function openModal(title,body,onOk,okText){$('mTitle').textContent=title;$('mBody').innerHTML=body;modalSubmit=onOk;
+ $('mFoot').innerHTML=(onOk?'<button class="btn" onclick="closeModal()">取消</button><button class="btn p" id="mOk">'+(okText||'确定')+'</button>':'<button class="btn" onclick="closeModal()">关闭</button>');
+ if(onOk)$('mOk').onclick=function(){try{if(modalSubmit()!==false){closeModal();render()}}catch(e){toast(e.message)}};
+ $('mask').style.display='flex'}
+function closeModal(){$('mask').style.display='none';modalSubmit=null}
+function fv(id){var e=$(id);return e?String(e.value).trim():''}
+function opts(arr,sel,labelFn,empty){return (empty!=null?'<option value="">'+esc(empty)+'</option>':'')+arr.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===sel?' selected':'')+'>'+esc(labelFn?labelFn(x):x.name)+'</option>'}).join('')}
+function sopts(arr,sel){return arr.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+esc(x)+'</option>'}).join('')}
+function custLabel(c){return c.name+' '+c.phone+'（'+c.status+'）'}
+function confirmDo(msg,fn){openModal('确认操作','<p>'+esc(msg)+'</p>',function(){fn()},'确认')}
+// 页内确认框（不用浏览器原生 confirm，沙箱/App 内预览里原生对话框会被屏蔽）。返回 true 表示已确认可继续；否则弹出页内确认，确认后重新执行 redo
+var _cfOK=false,_NATIVE_CONFIRM=window.confirm;
+function cf(msg,redo){if(_cfOK){_cfOK=false;return true}if(window.confirm!==_NATIVE_CONFIRM){try{return !!window.confirm(msg)}catch(e){}}confirmDo(msg,function(){_cfOK=true;try{redo()}finally{_cfOK=false}});return false}
+
+/* ========== 导航 ========== */
+var NAV=[
+ ['业务受理',[['dash','总览'],['cust','客户管理'],['custdetail','客户详情'],['pay','充值缴费'],['bill','用量与出账'],['ticket','工单中心'],['log','受理记录']]],
+ ['产品配置',[['prod','商品库'],['plan','套餐管理'],['plandetail','套餐详情'],['addon','可选包'],['camp','营销活动']]],
+ ['积分与客服',[['level','客户级别'],['points','客户积分'],['mall','积分商城'],['agent','客服与绩效']]],
+ ['系统',[['operator','操作员管理'],['data','数据管理']]]
+];
+var page='dash',sub={};
+function go(p){page=p;$('side').classList.remove('open');render();window.scrollTo(0,0)}
+function toggleSide(){$('side').classList.toggle('open')}
+function renderSide(){var h='<div class="brand">CBSS业务支撑系统3.0</div>';
+ NAV.forEach(function(g){h+='<div class="grp">'+g[0]+'</div>';g[1].forEach(function(n){h+='<a class="nav'+(page===n[0]?' on':'')+'" onclick="go(\''+n[0]+'\')">'+n[1]+'</a>'})});$('side').innerHTML=h}
+function render(){if(!PAGES[page])page='dash';renderSide();renderOpSel();var title='';NAV.forEach(function(g){g[1].forEach(function(n){if(n[0]===page)title=n[1]})});$('title').textContent=title;
+ $('curMonth').textContent='当前账期 '+S.month;$('content').innerHTML=PAGES[page]()}
+
+/* ========== 页面 ========== */
+var PAGES={};
+function kpi(l,v,s,p){return '<div class="kpi"'+(p?' style="cursor:pointer" onclick="go(\''+p+'\')"':'')+'><div class="l">'+esc(l)+'</div><div class="v">'+esc(v)+'</div><div class="s">'+esc(s||'')+'</div></div>'}
+function custName(id){var c=byId(S.customers,id);if(c)return c.name+' '+c.phone;var r=(S.removedCusts||[]).filter(function(x){return x.id===id})[0];return r?r.name+' '+r.phone+'（已撤销开户）':'-'}
+function logTable(rows){return '<div class="tbl-wrap"><table><tr><th>撤单</th><th>受理单号</th><th>时间</th><th>业务类型</th><th>客户</th><th>内容</th><th>操作员</th><th>部门</th></tr>'+(rows.length?rows.map(function(l){return '<tr><td>'+undoCell(l)+'</td><td class="mono">'+esc(l.no)+'</td><td>'+esc(l.t)+'</td><td><span class="badge b-pri">'+esc(l.type)+'</span></td><td>'+esc(l.cid?custName(l.cid):'-')+'</td><td style="white-space:normal;min-width:240px">'+esc(l.desc)+'</td><td>'+esc(l.op||'-')+(l.opNo?'<div class="muted mono" style="font-size:11px">'+esc(l.opNo)+'</div>':'')+'</td><td>'+esc(l.dept||'-')+'</td></tr>'}).join(''):'<tr><td colspan="8" class="muted">暂无记录</td></tr>')+'</table></div>'}
+function txnTable(tx){return '<div class="tbl-wrap"><table><tr><th>流水号</th><th>时间</th><th>客户</th><th>类型</th><th class="right">金额</th><th>说明</th></tr>'+(tx.map(function(t){return '<tr><td class="mono">'+t.no+'</td><td>'+t.t+'</td><td>'+esc(custName(t.cid))+'</td><td>'+esc(t.type)+'</td><td class="right" style="color:'+(t.amount<0?'var(--bad)':'')+'">'+money(t.amount)+'</td><td>'+esc(t.desc)+'</td></tr>'}).join('')||'<tr><td colspan=6 class="muted">暂无</td></tr>')+'</table></div>'}
+
+PAGES.dash=function(){
+ var cs=S.customers.filter(function(c){return c.status!=='销户'});
+ var cnt={'在网':0,'停机':0,'欠费停机':0};cs.forEach(function(c){cnt[c.status]=(cnt[c.status]||0)+1});
+ var rev=S.monthRevenue[S.month]||0;
+ var ptsIssued=S.pointLogs.filter(function(p){return p.month===S.month&&(p.rev?p.delta<0:p.delta>0)}).reduce(function(s,p){return s+p.delta},0);
+ var campUses=S.campaigns.reduce(function(s,c){return s+c.uses},0),campTotal=S.campaigns.reduce(function(s,c){return s+c.total},0);
+ var openT=S.tickets.filter(function(t){return t.status!=='已关闭'}).length;
+ var arrears=cs.filter(function(c){return c.balance<0}).reduce(function(s,c){return s+c.balance},0);
+ var h='<div class="grid g4">'+
+  kpi('客户总数',cs.length,'已销户 '+(S.customers.length-cs.length)+' 户','cust')+kpi('在网 / 停机 / 欠费停机',cnt['在网']+' / '+cnt['停机']+' / '+cnt['欠费停机'],'欠费金额 '+money(-arrears),'pay')+
+  kpi('本月收入（'+S.month+'）',money(rev),'开户、订购与出账实扣','bill')+kpi('本月积分发放',ptsIssued,'客户积分流水 '+S.pointLogs.length+' 条','points')+
+  kpi('活动参与次数',campUses,'累计优惠/赠送 '+money(campTotal),'camp')+kpi('未结工单',openT,'工单总数 '+S.tickets.length,'ticket')+
+  kpi('在售套餐',S.plans.filter(function(p){return p.status==='在售'}).length,'可选包 '+S.addons.length+' 个 · 商品 '+S.products.length+' 个','plan')+kpi('客服人员',S.agents.length,'在岗 '+S.agents.filter(function(a){return a.status==='在岗'}).length,'agent')+'</div>';
+ var tot=cs.length||1,a1=cnt['在网']/tot*360,a2=a1+cnt['停机']/tot*360;
+ var donut='<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap"><div class="donut" style="background:conic-gradient(#16a34a 0 '+a1+'deg,#e88a00 '+a1+'deg '+a2+'deg,#dc2626 '+a2+'deg 360deg)"></div><div class="legend"><div><i style="background:#16a34a"></i>在网 '+cnt['在网']+'</div><div><i style="background:#e88a00"></i>停机 '+cnt['停机']+'</div><div><i style="background:#dc2626"></i>欠费停机 '+cnt['欠费停机']+'</div></div></div>';
+ var maxP=1,pc=S.plans.map(function(p){var n=cs.filter(function(c){return c.planId===p.id}).length;if(n>maxP)maxP=n;return [p.name,n]});
+ var bars=pc.map(function(x){return '<div class="bar"><span class="bl" title="'+esc(x[0])+'">'+esc(x[0])+'</span><span class="bt"><span class="bf" style="display:block;width:'+(x[1]/maxP*100)+'%"></span></span><b>'+x[1]+'</b></div>'}).join('');
+ var months=Object.keys(S.monthRevenue).sort().slice(-6);if(!months.length)months=[S.month];
+ var maxR=Math.max.apply(null,months.map(function(m){return S.monthRevenue[m]||0}).concat([1]));
+ var W=360,H=150,bw=W/months.length;
+ var svg='<svg viewBox="0 0 '+W+' '+(H+24)+'" width="100%" style="max-width:520px">'+months.map(function(m,i){var v=S.monthRevenue[m]||0,bh=v/maxR*(H-20);return '<rect x="'+(i*bw+bw*0.25)+'" y="'+(H-bh)+'" width="'+(bw*0.5)+'" height="'+bh+'" rx="3" fill="#2f6bff"/><text x="'+(i*bw+bw/2)+'" y="'+(H-bh-4)+'" font-size="10" text-anchor="middle" fill="#56627a">'+Math.round(v)+'</text><text x="'+(i*bw+bw/2)+'" y="'+(H+16)+'" font-size="11" text-anchor="middle" fill="#7a8699">'+m+'</text>'}).join('')+'</svg>';
+ h+='<div class="grid g3" style="margin-top:16px"><div class="card"><h3>客户状态分布</h3>'+donut+'</div><div class="card"><h3>套餐用户分布</h3>'+bars+'</div><div class="card"><h3>月度收入（元）</h3>'+svg+'</div></div>';
+ var camp=S.campaigns.map(function(c){return '<tr><td>'+esc(c.name)+'</td><td>'+esc(c.type)+'</td><td>'+statusBadge(c.status)+'</td><td class="right">'+c.uses+'</td><td class="right">'+(c.type==='积分翻倍'?'多发 '+(c.extraPts||0)+' 分':money(c.total))+'</td></tr>'}).join('');
+ h+='<div class="card"><h3>营销活动效果<span class="sp"></span><a onclick="go(\'camp\')">管理</a></h3><div class="tbl-wrap"><table><tr><th>活动</th><th>类型</th><th>状态</th><th class="right">参与</th><th class="right">优惠总额</th></tr>'+camp+'</table></div></div>';
+ h+='<div class="card"><h3>最近受理<span class="sp"></span><a onclick="go(\'log\')">全部</a></h3>'+logTable(S.logs.slice(0,8))+'</div>';
+ h+='<div class="note">快速上手：① 在「商品库」定义商品 → ② 在「套餐管理 / 可选包」用商品组合套餐 → ③ 在「营销活动」配置优惠 → ④ 在「客户管理」开户、订购 → ⑤ 在「用量与出账」模拟用量并月末出账 → ⑥ 在「工单中心」处理工单产生客服积分。所有数据均为虚构，仅保存在本浏览器。</div>';
+ return h;
+};
+
+/* ---- 客户 ---- */
+PAGES.cust=function(){
+ var q=(sub.custQ||'').toLowerCase(),st=sub.custSt||'';
+ var list=S.customers.filter(function(c){return (!st||c.status===st)&&(!q||(c.name+c.phone).toLowerCase().indexOf(q)>=0)});
+ var h='<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgOpen()">＋ 开户</button><input placeholder="搜索姓名/号码" value="'+esc(sub.custQ||'')+'" oninput="sub.custQ=this.value;rerenderKeep(this)" id="custQ"><select onchange="sub.custSt=this.value;render()"><option value="">全部状态</option>'+sopts(['在网','停机','欠费停机','销户'],st)+'</select><span class="muted">共 '+list.length+' 户</span></div>';
+ h+='<div class="tbl-wrap"><table><tr><th>姓名</th><th>号码</th><th>级别</th><th>套餐</th><th>状态</th><th class="right">余额</th><th class="right">信用额度</th><th class="right">积分</th><th>可选包</th><th>操作</th></tr>'+list.map(function(c){var pl=byId(S.plans,c.planId);
+  return '<tr><td><a onclick="dlgCust(\''+c.id+'\')">'+esc(c.name)+'</a></td><td class="mono">'+esc(c.phone)+'</td><td>'+levelBadge(c)+'</td><td>'+esc(pl?pl.name:'-')+'</td><td>'+statusBadge(c.status)+'</td><td class="right" style="color:'+(c.balance<0?'var(--bad)':'')+'">'+money(c.balance)+'</td><td class="right">'+(num(c.credit)>0?money(c.credit)+'<div class="muted" style="font-size:11px">'+(c.creditExp?(today()>c.creditExp?'已过期':'至 '+c.creditExp):'长期')+'</div>':'<span class="muted">-</span>')+'</td><td class="right">'+c.points+'</td><td>'+(c.addons||[]).length+'</td><td>'+
+  (c.status==='销户'?'<button class="btn s" onclick="dlgCust(\''+c.id+'\')">查看</button>':'<button class="btn s" onclick="dlgCust(\''+c.id+'\')">详情</button><button class="btn s" onclick="dlgRecharge(\''+c.id+'\')">充值</button>')+'</td></tr>'}).join('')+'</table></div></div>';
+ return h;
+};
+function rerenderKeep(el){var id=el.id,pos=el.selectionStart;render();var e=$(id);if(e){e.focus();try{e.setSelectionRange(pos,pos)}catch(x){}}}
+function dlgOpen(){
+ var pls=S.plans.filter(function(p){return p.status==='在售'});if(!pls.length){toast('还没有在售套餐，请先到「套餐管理」新增套餐');return}
+ var rnd;do{rnd='138-0000-'+String(Math.floor(2000+Math.random()*7999))}while(S.customers.some(function(c){return c.phone===rnd}));
+ openModal('开户受理','<div class="form"><div class="f"><label>客户姓名 *</label><input id="o_name" placeholder="如：测试用户"></div><div class="f"><label>号码（虚构示例号段）</label><input id="o_phone" value="'+rnd+'"></div>'+
+  '<div class="f"><label>证件号（选填）</label><input id="o_idno" value=""></div><div class="f"><label>客户级别</label><select id="o_lv">'+levelsSorted().map(function(l,i){return '<option value="'+esc(l.id)+'"'+(i===0?' selected':'')+'>'+esc(l.name)+'</option>'}).join('')+'</select></div>'+
+  '<div class="f"><label>选择套餐 *</label><select id="o_plan" onchange="previewOpen()">'+opts(pls,'',function(p){return p.name+' · '+money(p.fee)+'/月'})+'</select></div><div class="f"><label>预存话费（元）</label><input id="o_pre" type="number" value="100"></div><div class="f"><label>信用额度（元，选填，留空=0）</label><input id="o_cr" type="number" min="0" placeholder="0"></div><div class="f"><label>信用额度有效期（留空=长期有效）</label><input id="o_crx" type="date"></div>'+
+  campField('o_cb','开户',pls[0].id,null)+'<div class="f full"><div class="note" id="o_prev"></div></div></div>',function(){
+   var r=openAccount({name:fv('o_name'),phone:fv('o_phone'),idno:fv('o_idno'),planId:fv('o_plan'),prepay:fv('o_pre'),credit:fv('o_cr'),creditExp:fv('o_crx'),levelId:fv('o_lv'),camps:campSel('o_cb')});
+   toast('开户成功：'+r.cust.phone+'，首月实扣 '+money(r.fee)+(r.applied.length?'，命中活动 '+r.applied.length+' 个':''));},'确认开户');
+ previewOpen();
+}
+function previewOpen(){var pl=byId(S.plans,fv('o_plan'));if(!pl||!$('o_prev'))return;
+ if($('o_cb')&&$('o_cb').getAttribute('data-plan')!==pl.id){$('o_cb').innerHTML=campBoxHtml('开户',pl.id,null);$('o_cb').setAttribute('data-plan',pl.id)}
+ $('o_prev').innerHTML='<b>套餐内容：</b>'+esc(itemsText(pl.items))+'<br><b>超额资费：</b>流量 '+money(pl.over.data)+'/GB，通话 '+money(pl.over.voice)+'/分钟，短信 '+money(pl.over.sms)+'/条<br>开户时从预存中扣除首月月租（勾选的活动优惠后）。'}
+function dlgCust(cid){closeModal();sub.cdC=cid;sub.cdQ='';go('custdetail')}
+function dlgCustModal(cid){
+ var c=byId(S.customers,cid);if(!c)return;var pl=byId(S.plans,c.planId),q=quota(c);
+ var adds=(c.addons||[]).map(function(x){var a=byId(S.addons,x.aid);return a?'<div class="items-row"><span style="flex:1">'+esc(a.name)+' <span class="muted">('+a.cycle+'，'+money(a.price)+(addonExtraText(x)?'，'+esc(addonExtraText(x)):'')+')</span></span>'+(c.status!=='销户'?'<button class="btn s d" onclick="doCancelAddon(\''+c.id+'\',\''+a.id+'\')">退订</button>':'')+'</div>':''}).join('')||'<span class="muted">未订购</span>';
+ var gifts=(c.gifts||[]).filter(function(g){return g.month===S.month}).map(function(g){var p=byId(S.products,g.pid);return '<span>'+esc((p?p.name:'?')+' ×'+g.qty+'（'+g.from+'）')+'</span>'}).join('')||'<span class="muted" style="background:none;color:var(--muted)">无</span>';
+ var tx=S.txns.filter(function(t){return t.cid===c.id}).slice(0,10);
+ var h='<div class="kv"><div>姓名</div><div>'+esc(c.name)+'</div><div>号码</div><div class="mono">'+esc(c.phone)+'</div><div>证件号</div><div>'+esc(c.idno)+'</div><div>入网日期</div><div>'+esc(c.openDate)+'</div><div>状态</div><div>'+statusBadge(c.status)+'</div><div>余额</div><div><b style="color:'+(c.balance<0?'var(--bad)':'')+'">'+money(c.balance)+'</b>'+(c.balance<0&&c.status==='在网'&&creditOf(c)?' <span class="muted" style="font-size:12px">（信用额度内欠费）</span>':'')+'</div><div>信用额度</div><div>'+esc(creditText(c))+'</div><div>可用额度</div><div><b>'+money(availBal(c))+'</b> <span class="muted" style="font-size:12px">余额 + 有效信用额度</span></div><div>积分</div><div>'+c.points+'</div><div>套餐</div><div>'+esc(pl?pl.name+'（'+money(pl.fee)+'/月）':'-')+'</div>'+
+ '<div>本月额度</div><div>流量 '+q.data+'GB · 通话 '+q.voice+'分钟 · 短信 '+q.sms+'条</div><div>本月已用</div><div>流量 '+c.usage.data+'GB · 通话 '+c.usage.voice+'分钟 · 短信 '+c.usage.sms+'条</div><div>赠品</div><div class="chips">'+gifts+'</div></div>';
+ h+='<h4 style="margin:16px 0 8px">可选包</h4>'+adds;
+ if(c.status!=='销户'){
+  h+='<h4 style="margin:16px 0 8px">业务办理</h4><div class="toolbar">'+
+  '<select id="d_plan">'+opts(S.plans.filter(function(p){return p.status==='在售'}),c.planId)+'</select><button class="btn" onclick="doChangePlan(\''+c.id+'\')">变更套餐</button></div><div class="toolbar">'+
+  '<select id="d_addon">'+opts(S.addons.filter(function(a){return a.status==='在售'&&addonCat(a)==='通用'}),'',function(a){return a.name+' '+money(a.price)+'（'+a.cycle+'）'})+'</select><button class="btn" onclick="doOrderAddon(\''+c.id+'\')">订购可选包</button><button class="btn" onclick="closeModal();dlgBroadband(\''+c.id+'\')">办理宽带/固话</button></div><div class="toolbar">'+
+  '<button class="btn p" onclick="closeModal();dlgRecharge(\''+c.id+'\')">充值</button>'+
+  (c.status==='在网'?'<button class="btn" onclick="doStatus(\''+c.id+'\',\'停机\')">停机</button>':'<button class="btn" onclick="doStatus(\''+c.id+'\',\'在网\')">复机</button>')+
+  '<button class="btn" onclick="closeModal();dlgUsage(\''+c.id+'\')">录入话单</button><button class="btn" onclick="closeModal();dlgRedeem(\''+c.id+'\')">积分兑换</button><button class="btn" onclick="closeModal();dlgTicket(\''+c.id+'\')">新建工单</button><button class="btn d" onclick="doStatus(\''+c.id+'\',\'销户\')">销户</button></div>';
+ }
+ h+='<h4 style="margin:16px 0 8px">最近流水</h4><div class="tbl-wrap"><table><tr><th>时间</th><th>类型</th><th class="right">金额</th><th>说明</th></tr>'+(tx.map(function(t){return '<tr><td>'+t.t+'</td><td>'+esc(t.type)+'</td><td class="right">'+money(t.amount)+'</td><td>'+esc(t.desc)+'</td></tr>'}).join('')||'<tr><td colspan=4 class="muted">暂无</td></tr>')+'</table></div>';
+ openModal('客户详情 · '+c.name,h,null);
+}
+function wrap(fn,cid){try{fn();render();if(cid)dlgCust(cid)}catch(e){toast(e.message)}}
+function doChangePlan(cid){var c=byId(S.customers,cid);if(!c)return;if(isStopped(c))return toast(STOP_MSG);var pls=S.plans.filter(function(p){return p.status==='在售'});if(!pls.length)return toast('暂无在售套餐');var sel=$('d_plan')?fv('d_plan'):c.planId;
+ var cur=byId(S.plans,c.planId);sub.cpC=cid;
+ openModal('变更套餐 · '+c.name,'<div class="form"><div class="f full"><label>当前套餐</label><div>'+esc(cur?cur.name:'-')+(c.pendingPlan?' <span class="muted" style="font-size:12px">待生效：'+esc(pendingPlanText(c))+'</span>':'')+'</div></div><div class="f full"><label>新套餐</label><select id="cp_new" onchange="cpPlanChanged()">'+opts(pls,sel,function(p){return p.name+' · '+money(p.fee)+'/月'})+'</select></div>'+
+  '<div class="f full"><label>生效方式</label><div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:inline-flex;gap:6px;align-items:center;font-size:13px;color:inherit;cursor:pointer"><input type="radio" name="cp_eff" value="now" checked onchange="cpFeeHint()" style="width:auto;margin:0"> 立即生效</label><label style="display:inline-flex;gap:6px;align-items:center;font-size:13px;color:inherit;cursor:pointer"><input type="radio" name="cp_eff" value="next" onchange="cpFeeHint()" style="width:auto;margin:0"> 下周期生效（'+nextCycleDate()+' 生效）</label></div><div id="cp_fee" style="margin-top:6px;font-size:13px"></div></div>'+campField('cp_cb','变更套餐',sel,c,true).replace('<div id="cp_cb">','<div id="cp_cb" onchange="cpFeeHint()">')+
+  '<div class="f full note">立即生效：马上换成新套餐并立即扣除新套餐的套餐费（按余额+信用额度判断是否足够），本月额度按新套餐，本月出账不再重复收取月租。下周期生效：本账期仍按原套餐使用和出账，次月1日（月末出账切换账期时）自动换成新套餐，同时扣除新套餐的套餐费；生效前可取消预约。'+(c.pendingPlan?'再次预约会替换原来的预约，立即生效会取消原来的预约。':'')+'</div></div>',function(){
+  var pid=fv('cp_new'),eff=(document.querySelector('input[name=cp_eff]:checked')||{}).value;var cps=firstCamp(campSel('cp_cb'));if(eff==='next'){var p=schedulePlan(cid,pid,cps);toast('已预约，'+p.effDate+' 生效')}else{changePlan(cid,pid,cps);toast('套餐已变更（立即生效）')}},'确认变更');cpFeeHint()}
+function cpPlanChanged(){if($('cp_cb'))$('cp_cb').innerHTML=campBoxHtml('变更套餐',fv('cp_new'),byId(S.customers,sub.cpC),true);cpFeeHint()}
+function cpFeeHint(){var e=$('cp_fee');if(!e)return;var now=(document.querySelector('input[name=cp_eff]:checked')||{}).value!=='next';var pl=byId(S.plans,fv('cp_new'));var c=byId(S.customers,sub.cpC);
+ if(pl&&c){var f0=r2(num(pl.fee)),dd=campDiscPreview('变更套餐',c,pl.id,f0,firstCamp(campSel('cp_cb')));if(dd>0){var fn=r2(Math.max(0,f0-dd)),av0=availBal(c);e.innerHTML=(now?'<b>立即扣除套餐费 '+money(fn)+'</b>':'<b>次月1日生效时扣除套餐费 '+money(fn)+'</b>')+' <span class="muted">（月费 '+money(f0)+'，活动优惠 '+money(dd)+(now?'，当前可用额度 '+money(av0):'，生效时按活动规则计算')+'）</span>'+(now&&fn>0&&av0<fn?' <span style="color:var(--bad)">可用额度不足</span>':'');return}}
+ if(!pl){e.innerHTML='';return}if(!now){e.innerHTML='<b>次月1日生效时扣除套餐费 '+money(r2(num(pl.fee)))+'</b> <span class="muted">（'+nextCycleDate()+' 生效，当月出账不再重复收取月租）</span>';return}var fee=r2(num(pl.fee)),av=c?availBal(c):0;
+ e.innerHTML='<b>立即扣除套餐费 '+money(fee)+'</b> <span class="muted">（当前可用额度 '+money(av)+'）</span>'+(c&&fee>0&&av<fee?' <span style="color:var(--bad)">可用额度不足</span>':'')}
+function doCancelPending(cid){confirmDo('确认取消预约的下周期套餐？',function(){cancelPendingPlan(cid);toast('已取消预约')})}
+function doOrderAddon(cid){dlgOrderAddon(cid,fv('d_addon'))}
+// 办理宽带/固话：在主套餐基础上订购宽带、固定电话可选包，不改变主套餐
+function dlgBroadband(cid,cat){var c=byId(S.customers,cid);if(!c)return;if(isStopped(c))return toast(STOP_MSG);if(c.status!=='在网')return toast('仅在网客户可办理');cat=cat||'宽带';sub.bbC=cid;
+ var pl=byId(S.plans,c.planId);var rb='display:inline-flex;gap:6px;align-items:center;font-size:13px;color:inherit;cursor:pointer';
+ openModal('办理宽带/固话 · '+c.name,'<div class="form"><div class="f full"><label>主套餐（不变）</label><div>'+esc(pl?pl.name+'（'+money(pl.fee)+'/月）':'-')+'</div></div>'+
+  '<div class="f full"><label>业务类型</label><div style="display:flex;gap:18px;flex-wrap:wrap"><label style="'+rb+'"><input type="radio" name="bb_k" value="宽带"'+(cat==='宽带'?' checked':'')+' onchange="bbKindChanged()" style="width:auto;margin:0"> 宽带</label><label style="'+rb+'"><input type="radio" name="bb_k" value="固定电话"'+(cat==='固定电话'?' checked':'')+' onchange="bbKindChanged()" style="width:auto;margin:0"> 固定电话</label></div></div>'+
+  '<div class="f full"><label>可选包</label><select id="bb_a" onchange="bbHint()"></select></div>'+
+  '<div class="f full"><label>安装地址 *</label><input id="bb_addr" placeholder="如 深圳市南山区科技园XX栋XX室"></div>'+
+  '<div class="f full" id="bb_fxw"><label>固话号码</label><input id="bb_fx" placeholder="留空自动分配"></div>'+
+  '<div class="f full"><div id="bb_hint" style="font-size:13px"></div></div>'+
+  campField('bb_cb','订购',c.planId,c).replace('<div id="bb_cb">','<div id="bb_cb" onchange="bbHint()">')+
+  '<div class="f full note">宽带/固话作为可选包订购，不影响主套餐；订购即扣当月月费，之后每月出账续扣，直到退订。宽带账号订购后自动生成。</div></div>',function(){
+  var aid=fv('bb_a');if(!aid)throw new Error('暂无在售的'+bbKind()+'可选包');var a=byId(S.addons,aid);var f=orderAddon(cid,aid,campSel('bb_cb'),{addr:fv('bb_addr'),fxNo:fv('bb_fx')});var cc=byId(S.customers,cid),x=(cc.addons||[]).filter(function(y){return y.aid===aid})[0];toast('办理成功，实扣 '+money(f)+(x&&x.bbAcct?'，宽带账号 '+x.bbAcct:'')+(x&&x.fxNo?'，固话号码 '+x.fxNo:''))},'确认办理');bbKindChanged()}
+function bbKind(){return (document.querySelector('input[name=bb_k]:checked')||{}).value||'宽带'}
+function bbKindChanged(){var k=bbKind(),c=byId(S.customers,sub.bbC);var had={};((c&&c.addons)||[]).forEach(function(x){had[x.aid]=1});var ads=S.addons.filter(function(a){return a.status==='在售'&&addonCat(a)===k&&!had[a.id]});
+ if($('bb_a'))$('bb_a').innerHTML=ads.length?opts(ads,'',function(a){return a.name+' · '+money(a.price)+'/月（'+(k==='宽带'?(a.speed||'-'):'含通话 '+num(a.minutes)+' 分钟')+'）'}):'<option value="">暂无可订购的'+k+'可选包</option>';
+ if($('bb_fxw'))$('bb_fxw').style.display=k==='固定电话'?'':'none';bbHint()}
+function bbHint(){var e=$('bb_hint');if(!e)return;var a=byId(S.addons,fv('bb_a')),c=byId(S.customers,sub.bbC);if(!a||!c){e.innerHTML='';return}var f0=r2(num(a.price)),dd=campDiscPreview('订购',c,c.planId,f0,campSel('bb_cb')),fn=r2(Math.max(0,f0-dd)),av=availBal(c);
+ e.innerHTML='<b>订购即扣当月月费 '+money(fn)+'</b> <span class="muted">（月费 '+money(f0)+(dd?'，活动优惠 '+money(dd):'')+'，当前可用额度 '+money(av)+'）</span>'+(fn>0&&av<=0?' <span style="color:var(--bad)">可用额度不足</span>':'')}
+function dlgOrderAddon(cid,aid,campId){var c=byId(S.customers,cid);if(!c)return;if(isStopped(c))return toast(STOP_MSG);var ads=S.addons.filter(function(a){return a.status==='在售'&&addonCat(a)==='通用'});if(!ads.length){toast('暂无在售可选包');return}
+ openModal('订购可选包 · '+c.name,'<div class="form"><div class="f full"><label>可选包</label><select id="oa_a">'+opts(ads,aid||'',function(a){return a.name+' '+money(a.price)+'（'+a.cycle+'）'})+'</select></div>'+campField('oa_cb','订购',c.planId,c)+'</div>',function(){var f=orderAddon(cid,fv('oa_a'),campSel('oa_cb'));toast('订购成功，实扣 '+money(f));},'确认订购');preTickCamp('oa_cb',campId)}
+// 参加营销活动：按活动类型直接参加，或打开对应业务并预先勾选该活动
+var JOIN_WAY={'积分翻倍':'join','充值赠送':'充值','充值分月返还':'充值','满减':'direct','折扣':'direct','赠送商品':'direct'};
+function joinWay(x,c){var w=JOIN_WAY[x.type];if(!w)return null;if(w==='direct'){var g=directGrant(x,c);if(g.err)return {w:w,dis:g.err}}return {w:w}}
+// 办理（满减/折扣/赠送商品）：不需要绑定其它业务，门槛不适用
+function directGrant(x,c){var v=num(x.value);
+ if(x.type==='赠送商品'){var p=byId(S.products,x.pid);if(!p)return {err:'活动未设置赠送商品'};var q=v||1;return {kind:'gift',pid:p.id,qty:q,hit:r2(num(p.price)*q),text:'赠送 '+p.name+(q>1?' ×'+q+'份':'')+'（本账期有效，价值 '+money(r2(num(p.price)*q))+'）'}}
+ if(x.type==='满减'){if(!(v>0))return {err:'活动减免金额未设置'};return {kind:'credit',hit:r2(v),text:'话费减免 '+money(v)+'，计入账户余额'}}
+ if(x.type==='折扣'){if(!(v>0&&v<10))return {err:'折扣值应在 0–10 之间'};var pl=c?byId(S.plans,c.planId):null;if(!pl||!(num(pl.fee)>0))return {err:'客户套餐无月租，无法按折扣减免'};var h=r2(num(pl.fee)*(1-v/10));return {kind:'credit',hit:h,text:'按套餐月租 '+money(pl.fee)+' 打 '+v+' 折，话费减免 '+money(h)+'，计入账户余额'}}
+ return {err:'该类型不能办理'}}
+function directJoinCamp(cid,id){return withUndo('参加活动',cid,function(){var c=byId(S.customers,cid),x=byId(S.campaigns,id);if(!c||!x)throw new Error('参数错误');assertNotStopped(c);
+ if(c.status==='销户')throw new Error('已销户客户不可参加活动');if(!campActive(x,c.planId,c))throw new Error('该客户不符合活动条件，或已达到参加次数上限');
+ var g=directGrant(x,c);if(g.err)throw new Error(g.err);
+ if(g.kind==='gift'){c.gifts=(c.gifts||[]).concat([{pid:g.pid,qty:g.qty,month:S.month,from:x.name,src:'营销活动'}]);addTxn(c.id,'活动优惠',g.hit,x.name+' · 办理')}
+ else{c.balance=r2(c.balance+g.hit);addTxn(c.id,'话费减免',g.hit,'营销活动减免：'+x.name)}
+ x.uses=(x.uses||0)+1;x.total=r2((x.total||0)+g.hit);
+ recCampUse(c,x,'订购',g.hit,g.text);
+ addLog('营销活动',c.id,'办理活动：'+x.name+'，'+g.text+'，余额 '+money(c.balance));
+ if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,'活动减免后欠费在信用额度内，自动复机')}
+ save();return g})}
+function joinCampGo(cid,id){var c=byId(S.customers,cid),x=byId(S.campaigns,id);if(!c||!x)return;if(c.status==='销户')return toast('已销户客户不可参加活动');var jw=joinWay(x,c);if(!jw||jw.dis)return toast(jw?jw.dis:'该活动无法在此参加');
+ if(jw.w==='join'){try{joinCamps(cid,[id]);toast('已参加：'+x.name);render();dlgJoinCamp(cid)}catch(e){toast(e.message)}return}
+ if(jw.w==='充值')return dlgRecharge(cid,id);
+ var g=directGrant(x,c);openModal('确认办理营销活动','<div class="kv"><div>客户</div><div>'+esc(c.name+' '+c.phone)+'</div><div>活动</div><div>'+esc(x.name)+'（'+esc(x.type)+'）</div><div>办理内容</div><div>'+esc(g.text)+'</div>'+(g.kind==='credit'?'<div>办理后余额</div><div>'+money(r2(c.balance+g.hit))+'</div>':'')+'</div><div class="note" style="margin-top:10px">办理时不需要同时办理其它业务；办理后记入受理记录，可撤单。</div>',function(){directJoinCamp(cid,id);toast('已办理：'+x.name);setTimeout(function(){dlgJoinCamp(cid)},0)},'确认办理')}
+function dlgJoinCamp(cid){var c=byId(S.customers,cid);if(!c)return;if(isStopped(c))return toast(STOP_MSG);
+ var cs=S.campaigns.filter(function(x){return campActive(x,c.planId,c)&&JOIN_WAY[x.type]&&!(x.type==='积分翻倍'&&(c.camps||[]).indexOf(x.id)>=0)});
+ var en=(c.camps||[]).map(function(id){return byId(S.campaigns,id)}).filter(Boolean);
+ var WAYTXT={'join':'长期参加','充值':'办理充值时生效','direct':'点击办理'};
+ openModal('参加营销活动 · '+c.name,'<div class="form"><div class="f full"><label>可参加的活动（客户当前套餐和级别都符合、正在进行中）</label><div id="jc_list">'+(cs.length?cs.map(function(x){var jw=joinWay(x,c);return '<div class="items-row" data-camp="'+esc(x.id)+'"><span style="flex:1"><b>'+esc(x.name)+'</b> <span class="badge">'+esc(x.type)+'</span> <span class="muted" style="font-size:12px">'+esc(campRule(x))+' · '+(jw.dis?esc(jw.dis):WAYTXT[jw.w])+(num(x.maxTimes)>0?' · 每客户限 '+num(x.maxTimes)+' 次，已参加 '+campTimesUsed(x,c)+' 次':'')+'</span></span>'+(jw.dis?'<button class="btn s" disabled>参加</button>':'<button class="btn s p jc-go" onclick="joinCampGo(\''+c.id+'\',\''+x.id+'\')">参加</button>')+'</div>'}).join(''):'<span class="muted">无可参加的营销活动</span>')+'</div></div>'+
+ '<div class="f full"><label>已参加的活动</label>'+(function(){var us=campUsesOf(c.id).filter(function(u){return u.scene!=='手动参加'});var h=us.map(function(u){return '<div class="items-row"><span style="flex:1">'+esc(u.campName||'')+' <span class="muted" style="font-size:12px">（'+esc(u.scene||'')+' · '+esc(u.t||'')+(u.desc?' · '+esc(u.desc):'')+'）</span></span>'+campUseStatusHtml(u,c)+'</div>'}).join('');return h})()+(en.length?en.map(function(x){return '<div class="items-row"><span style="flex:1">'+esc(x.name)+' <span class="muted">（'+esc(campRule(x))+'）</span></span><button class="btn s d" onclick="try{quitCamp(\''+c.id+'\',\''+x.id+'\');toast(\'已退出活动\');render();dlgJoinCamp(\''+c.id+'\')}catch(e){toast(e.message)}">退出</button></div>'}).join(''):(campUsesOf(c.id).filter(function(u){return u.scene!=='手动参加'}).length?'':'<span class="muted">无</span>'))+'</div>'+
+ '<div class="f full note">点“参加”：积分翻倍直接长期参加，之后该客户的充值、开户、订购和月末出账积分都按倍数发放；充值赠送、充值分月返还会打开充值业务并预先勾选该活动，确认充值后生效；满减、折扣、赠送商品确认后办理（满减、折扣按话费减免计入余额，赠送商品直接发到本账期用量），不需要办理其它业务，可撤单。首月免费只在开户时参加，这里不显示。参加过的活动显示在“已参加的活动”里。</div></div>')}
+function doCancelAddon(cid,aid){wrap(function(){cancelAddon(cid,aid);toast('已退订')},cid)}
+function doStatus(cid,st){if(st==='销户'&&!cf('确认销户？销户后不可恢复（模拟）',function(){doStatus(cid,st)}))return;wrap(function(){setStatus(cid,st);toast(st==='在网'?'已复机':'已'+st)},cid)}
+
+/* ---- 充值 ---- */
+function dlgRecharge(cid,campId){
+ var cs=S.customers.filter(function(c){return c.status!=='销户'});
+ openModal('充值缴费','<div class="form"><div class="f full"><label>客户</label><select id="r_c" onchange="refreshCampBox(\'r_cb\',\'充值\',this.value)">'+opts(cs,cid,custLabel)+'</select></div><div class="f"><label>充值金额（元）</label><input type="number" id="r_amt" value="100"></div><div class="f"><label>支付方式（模拟，不涉及真实支付）</label><select id="r_way"><option>现金（模拟）</option><option>扫码（模拟）</option></select></div>'+campField('r_cb','充值',(byId(S.customers,cid||(cs[0]||{}).id)||{}).planId,byId(S.customers,cid||(cs[0]||{}).id))+'<div class="f full note">营销活动需手动勾选才生效；每满100元奖励积分按积分规则计算。欠费停机客户余额≥0后自动复机。</div></div>',function(){var r=recharge(fv('r_c'),fv('r_amt'),campSel('r_cb'));toast(r.msg)},'确认充值');
+ if(campId){preTickCamp('r_cb',campId);var cp0=byId(S.campaigns,campId);if(cp0&&num(cp0.threshold)>0)$('r_amt').value=num(cp0.threshold)}
+}
+PAGES.pay=function(){
+ var cs=S.customers.filter(function(c){return c.status!=='销户'});
+ var h='<div class="card"><h3>快速充值</h3><div class="toolbar"><select id="p_c" style="min-width:240px" onchange="refreshCampBox(\'p_cb\',\'充值\',this.value)">'+opts(cs,sub.payC||'',custLabel)+'</select><input type="number" id="p_amt" value="100" style="width:110px"><button class="btn" onclick="$(\'p_amt\').value=50">50</button><button class="btn" onclick="$(\'p_amt\').value=100">100</button><button class="btn" onclick="$(\'p_amt\').value=200">200</button><button class="btn p" onclick="doPay()">充值</button></div>';
+ var pc=byId(S.customers,sub.payC||'')||cs[0];
+ h+='<div style="margin-top:8px"><div class="muted" style="font-size:12px;margin-bottom:4px">参加营销活动（勾选后才生效，默认不参加）</div><div id="p_cb">'+campBoxHtml('充值',pc?pc.planId:'',pc)+'</div></div></div>';
+ var owe=cs.filter(function(c){return c.balance<0});
+ h+='<div class="card"><h3>欠费客户（'+owe.length+'）</h3><div class="tbl-wrap"><table><tr><th>客户</th><th>状态</th><th class="right">余额</th><th></th></tr>'+(owe.map(function(c){return '<tr><td>'+esc(custLabel(c))+'</td><td>'+statusBadge(c.status)+'</td><td class="right" style="color:var(--bad)">'+money(c.balance)+'</td><td><button class="btn s p" onclick="dlgRecharge(\''+c.id+'\')">缴费</button></td></tr>'}).join('')||'<tr><td colspan=4 class="muted">无欠费客户</td></tr>')+'</table></div></div>';
+ var tx=S.txns.filter(function(t){return ['充值','赠送','预存','积分兑换'].indexOf(t.type)>=0}).slice(0,50);
+ h+='<div class="card"><h3>缴费流水（最近50条）</h3>'+txnTable(tx)+'</div>';return h;
+};
+function doPay(){sub.payC=fv('p_c');try{var r=recharge(fv('p_c'),fv('p_amt'),campSel('p_cb'));toast(r.msg);render()}catch(e){toast(e.message)}}
+
+/* ---- 用量与出账 ---- */
+PAGES.bill=function(){
+ var tab=sub.billTab||'usage';
+ var h='<div class="tabs"><a class="'+(tab==='usage'?'on':'')+'" onclick="sub.billTab=\'usage\';render()">本月用量</a><a class="'+(tab==='bills'?'on':'')+'" onclick="sub.billTab=\'bills\';render()">账单明细</a><a class="'+(tab==='txn'?'on':'')+'" onclick="sub.billTab=\'txn\';render()">资金流水</a></div>';
+ if(tab==='usage'){
+  h+='<div class="card"><h3>账期 '+S.month+' 用量<span class="sp"></span><button class="btn" onclick="doRandUsage()">随机生成用量</button><button class="btn" onclick="doCheckCredit()">执行信用额度检查</button><button class="btn p" onclick="doBilling()">月末出账</button></h3><div class="note" style="margin-bottom:10px">出账将：扣月租（开户当月已收则跳过）＋包月可选包＋超额费用；余额&lt;0 的在网客户自动欠费停机；发放消费积分与在网时长积分；然后进入下一账期（用量清零，一次性可选包和当月赠品失效）。</div>';
+  h+='<div class="tbl-wrap"><table><tr><th>客户</th><th>套餐</th><th>状态</th><th>流量 已用/额度(GB)</th><th>通话(分钟)</th><th>短信(条)</th><th class="right">余额</th><th>话单</th></tr>'+S.customers.filter(function(c){return c.status!=='销户'}).map(function(c){var q=quota(c),pl=byId(S.plans,c.planId);
+   function cell(u,qq,c,key){var bd=c?usageBreakdown(c,key):{rows:[]};return '<span style="color:'+(u>qq?'var(--bad)':'')+'">'+u+' / '+qq+'</span>'+(bd.rows.length>1||(bd.rows.length&&bd.rows[0].src!=='套餐')?'<div class="muted" style="font-size:11px;line-height:1.5;white-space:normal;min-width:140px">'+bd.rows.map(function(x){return esc(x.name)+' '+x.used+'/'+x.amt}).join('<br>')+'</div>':'')}
+   return '<tr><td>'+esc(c.name+' '+c.phone)+'</td><td>'+esc(pl?pl.name:'-')+'</td><td>'+statusBadge(c.status)+'</td><td>'+cell(c.usage.data,q.data,c,'data')+'</td><td>'+cell(c.usage.voice,q.voice,c,'voice')+'</td><td>'+cell(c.usage.sms,q.sms,c,'sms')+'</td><td class="right">'+money(c.balance)+'</td><td>'+(c.status==='在网'?'<button class="btn s" onclick="dlgUsage(\''+c.id+'\')">录入话单</button>':'<span class="muted">非在网</span>')+'</td></tr>'}).join('')+'</table></div></div>';
+ }else if(tab==='bills'){
+  var cf=sub.billC||'';var bs=S.bills.filter(function(b){return !cf||b.cid===cf}).slice(0,200);
+  h+='<div class="card"><div class="toolbar"><select onchange="sub.billC=this.value;render()">'+opts(S.customers,cf,custLabel,'全部客户')+'</select><span class="muted">显示最近 '+bs.length+' 张</span></div><div class="tbl-wrap"><table><tr><th>账单号</th><th>账期</th><th>客户</th><th>类型</th><th>明细</th><th class="right">合计</th></tr>'+(bs.map(function(b){return '<tr><td class="mono">'+b.no+'</td><td>'+b.month+'</td><td>'+esc(custName(b.cid))+'</td><td>'+esc(b.note)+(b.voided?' <span class="badge b-warn">已撤单</span>':'')+'</td><td style="white-space:normal;min-width:260px">'+b.items.map(function(i){return esc(i.name)+'：'+money(i.amt)}).join('<br>')+(b.usage?'<div class="muted" style="font-size:12px">用量 流量'+b.usage.data+'/'+b.quota.data+'GB 通话'+b.usage.voice+'/'+b.quota.voice+' 短信'+b.usage.sms+'/'+b.quota.sms+'</div>':'')+'</td><td class="right"><b>'+money(b.total)+'</b></td></tr>'}).join('')||'<tr><td colspan=6 class="muted">暂无账单，可在「本月用量」点击月末出账</td></tr>')+'</table></div></div>';
+ }else{
+  h+='<div class="card">'+txnTable(S.txns.slice(0,200))+'</div>';
+ }
+ return h;
+};
+function dlgUsage(cid){var c=byId(S.customers,cid);openModal('录入话单 · '+c.name,'<div class="form"><div class="f"><label>流量（GB）</label><input id="u_d" type="number" value="1"></div><div class="f"><label>通话（分钟）</label><input id="u_v" type="number" value="10"></div><div class="f"><label>短信（条）</label><input id="u_s" type="number" value="0"></div></div>',function(){withUndo('录入话单',cid,function(){if(!simUsage(cid,{data:fv('u_d'),voice:fv('u_v'),sms:fv('u_s')}))throw new Error('仅在网客户可产生用量');addLog('用量',cid,'录入话单：流量 '+fv('u_d')+'GB，通话 '+fv('u_v')+'分钟，短信 '+fv('u_s')+'条');save()});toast('已录入')})}
+function doRandUsage(){var n=randomUsageAll();toast('已为 '+n+' 位在网客户生成用量');render()}
+function doBilling(){confirmDo('确认对账期 '+S.month+' 执行月末出账？出账后进入下一账期。',function(){var r=runBilling();toast(r.month+' 出账完成：'+r.cnt+' 户，应收 '+money(r.total)+'，欠费停机 '+r.stopped+' 户；'+levelSummary(r.level));sub.billTab='bills'})}
+
+/* ---- 工单 ---- */
+var TCATS=['计费咨询','停复机','套餐变更','网络故障','投诉建议','撤单申请','其他'];
+PAGES.ticket=function(){
+ var f=sub.tSt||'';var ts=S.tickets.filter(function(t){return !f||t.status===f});
+ return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgTicket()">＋ 新建工单</button><select onchange="sub.tSt=this.value;render()"><option value="">全部状态</option>'+sopts(['待指派','处理中','已关闭'],f)+'</select><span class="muted">共 '+ts.length+' 张</span></div><div class="tbl-wrap"><table><tr><th>工单号</th><th>创建时间</th><th>客户</th><th>分类</th><th>标题</th><th>处理客服</th><th>状态</th><th>评价</th><th>操作</th></tr>'+(ts.map(function(t){var a=byId(S.agents,t.agentId);
+  return '<tr><td class="mono"><a onclick="dlgTicketView(\''+t.id+'\')">'+t.no+'</a></td><td>'+t.t+'</td><td>'+esc(custName(t.cid))+'</td><td>'+esc(t.cat)+'</td><td>'+esc(t.title)+(t.undoLog?'<div class="muted mono" style="font-size:11px">撤 '+esc(t.undoLog)+'</div>':'')+'</td><td>'+esc(a?a.name:'-')+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.rating?'★'.repeat(t.rating):'-')+'</td><td>'+(t.status==='已关闭'?'<button class="btn s" onclick="dlgTicketView(\''+t.id+'\')">查看</button>':(t.undoLog?'<button class="btn s p" onclick="approveUndo(\''+t.id+'\')">同意撤单</button>':'')+'<button class="btn s" onclick="dlgAssign(\''+t.id+'\')">'+(t.agentId?'流转':'指派')+'</button><button class="btn s" onclick="dlgClose(\''+t.id+'\')">关闭</button>')+'</td></tr>'}).join('')||'<tr><td colspan=9 class="muted">暂无工单</td></tr>')+'</table></div></div>';
+};
+function dlgTicket(cid){openModal('新建工单','<div class="form"><div class="f full"><label>客户</label><select id="t_c" onchange="ticketUndoOpts()">'+opts(S.customers,cid||'',custLabel)+'</select></div><div class="f"><label>分类</label><select id="t_cat" onchange="ticketUndoOpts()">'+sopts(TCATS)+'</select></div><div class="f full" id="t_undo_box" style="display:none"><label>要撤销的受理记录</label><select id="t_undo"></select></div><div class="f"><label>标题 *</label><input id="t_title" placeholder="如：网速慢"></div><div class="f full"><label>描述</label><textarea id="t_desc" rows="3"></textarea></div></div>',function(){if(fv('t_cat')==='撤单申请'&&!fv('t_undo'))throw new Error('请选择要撤销的受理记录');var tk=createTicket(fv('t_c'),fv('t_title')||(fv('t_cat')==='撤单申请'?'撤单申请':''),fv('t_cat'),fv('t_desc'));if(fv('t_cat')==='撤单申请'){tk.undoLog=fv('t_undo');tk.flow.push({t:nowStr(),op:opName(),dept:opDept(),text:'申请撤销受理记录 '+tk.undoLog});save()}toast('工单已创建');page='ticket'})}
+function dlgAssign(tid){var t=byId(S.tickets,tid);openModal((t.agentId?'流转':'指派')+'工单 '+t.no,'<div class="form"><div class="f full"><label>处理客服</label><select id="a_g">'+opts(S.agents.filter(function(a){return a.status==='在岗'&&a.id!==t.agentId}),'',function(a){return a.name+'（'+a.group+'，'+a.points+'分）'})+'</select></div><div class="f full"><label>备注</label><input id="a_n"></div></div>',function(){assignTicket(tid,fv('a_g'),fv('a_n'));toast('已'+(t.agentId?'流转':'指派'))})}
+function dlgClose(tid){var t=byId(S.tickets,tid);openModal('关闭工单 '+t.no,'<div class="form"><div class="f"><label>客户评价</label><select id="c_r"><option value="5">★★★★★ 非常满意</option><option value="4">★★★★ 满意</option><option value="3">★★★ 一般</option><option value="2">★★ 不满意</option><option value="1">★ 很不满意</option><option value="0">未评价</option></select></div><div class="f"><label>处理结果</label><input id="c_n" value="已解决"></div><div class="f full note">结单客服 +'+S.agentRules.close+' 分；4–5星好评 +'+S.agentRules.good+' 分；1–2星差评 '+S.agentRules.bad+' 分；客户评价奖励 '+S.pointRules.reviewCust+' 积分（可在「客服与绩效」「客户积分」中修改规则）。</div></div>',function(){closeTicket(tid,fv('c_r'),fv('c_n'));toast('工单已关闭')})}
+function dlgTicketView(tid){var t=byId(S.tickets,tid),a=byId(S.agents,t.agentId);openModal('工单 '+t.no,'<div class="kv"><div>客户</div><div>'+esc(custName(t.cid))+'</div><div>分类</div><div>'+esc(t.cat)+'</div><div>标题</div><div>'+esc(t.title)+'</div><div>客服</div><div>'+esc(a?a.name:'-')+'</div><div>状态</div><div>'+statusBadge(t.status)+'</div><div>评价</div><div>'+(t.rating?'★'.repeat(t.rating):'-')+'</div></div><h4>流转记录</h4>'+t.flow.map(function(f){return '<div style="margin:6px 0"><span class="muted">'+f.t+(f.op?' · '+esc(f.op)+(f.dept&&f.dept!=='-'?'（'+esc(f.dept)+'）':''):'')+'</span> '+esc(f.text)+'</div>'}).join(''),null)}
+
+PAGES.log=function(){var q=sub.logQ||'',ty=sub.logT||'';var types={};S.logs.forEach(function(l){types[l.type]=1});
+ var ls=S.logs.filter(function(l){return (!ty||l.type===ty)&&(!q||(l.no+l.desc+custName(l.cid)).indexOf(q)>=0)}).slice(0,300);
+ return '<div class="card"><div class="toolbar"><input id="logQ" placeholder="搜索单号/内容/客户" value="'+esc(q)+'" oninput="sub.logQ=this.value;rerenderKeep(this)"><select onchange="sub.logT=this.value;render()"><option value="">全部类型</option>'+sopts(Object.keys(types),ty)+'</select><span class="muted">显示 '+ls.length+' 条（共 '+S.logs.length+'）</span></div>'+logTable(ls)+'</div>'};
+/* ---- 商品库 ---- */
+var PTYPES=['流量','语音','短信','权益','宽带','其他'];
+function refCount(pid){return S.plans.filter(function(pl){return pl.items.some(function(i){return i.pid===pid})}).length+S.addons.filter(function(a){return a.items.some(function(i){return i.pid===pid})}).length}
+PAGES.prod=function(){return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgProd()">＋ 新增商品</button><span class="muted">类型为“流量/语音/短信”的商品会计入客户额度并参与超额计算；其它类型作为权益展示</span></div><div class="tbl-wrap"><table><tr><th>编号</th><th>名称</th><th>类型</th><th>每份规格</th><th class="right">单价/价值</th><th>说明</th><th>状态</th><th>被引用</th><th>操作</th></tr>'+(S.products.map(function(p){
+ return '<tr><td class="mono">'+p.id+'</td><td><b>'+esc(p.name)+'</b></td><td>'+esc(p.type)+'</td><td>'+specText(p)+'</td><td class="right">'+money(p.price)+'</td><td>'+esc(p.desc)+'</td><td>'+(p.on?'<span class="badge b-ok">上架</span>':'<span class="badge">下架</span>')+'</td><td>'+refCount(p.id)+'</td><td><button class="btn s" onclick="dlgProd(\''+p.id+'\')">编辑</button><button class="btn s" onclick="toggleProd(\''+p.id+'\')">'+(p.on?'下架':'上架')+'</button><button class="btn s d" onclick="delItem(\'products\',\''+p.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=9 class="muted">暂无商品，点击「＋ 新增商品」添加</td></tr>')+'</table></div></div>'};
+function dlgProd(id){var p=id?byId(S.products,id):{name:'',type:'流量',unit:'GB',qty:'',price:0,desc:'',on:true};
+ openModal(id?'编辑商品':'新增商品','<div class="form"><div class="f"><label>名称 *</label><input id="pr_n" value="'+esc(p.name)+'"></div><div class="f"><label>类型</label><select id="pr_t">'+sopts(PTYPES,p.type)+'</select></div><div class="f"><label>单位</label><input id="pr_u" value="'+esc(p.unit)+'" placeholder="GB/分钟/条/张/月"></div><div class="f"><label>每份数量（选填）</label><input id="pr_q" type="number" placeholder="可不填" value="'+(p.qty===''||p.qty==null?'':p.qty)+'"></div><div class="f"><label>单价/价值（元/份）</label><input id="pr_p" type="number" value="'+p.price+'"></div><div class="f"><label>状态</label><select id="pr_o"><option value="1"'+(p.on?' selected':'')+'>上架</option><option value="0"'+(!p.on?' selected':'')+'>下架</option></select></div><div class="f full"><label>说明</label><input id="pr_d" value="'+esc(p.desc)+'"></div></div>',function(){
+  if(!fv('pr_n'))throw new Error('请填写名称');var o={name:fv('pr_n'),type:fv('pr_t'),unit:fv('pr_u'),qty:(fv('pr_q')===''?'':num(fv('pr_q'),1)),price:num(fv('pr_p')),desc:fv('pr_d'),on:fv('pr_o')==='1'};
+  if(id){Object.assign(p,o);addLog('配置','','修改商品 '+o.name)}else{o.id=uid('P');S.products.push(o);addLog('配置','','新增商品 '+o.name)}save();toast('已保存')})}
+function toggleProd(id){var p=byId(S.products,id);p.on=!p.on;addLog('配置','',(p.on?'上架':'下架')+'商品 '+p.name);save();render()}
+function delItem(coll,id,force){var it=byId(S[coll],id);if(!it)return false;
+ if(coll==='products'&&refCount(id)){toast('该商品被套餐/可选包引用，请先移除引用或改为下架');return false}
+ if(coll==='plans'&&S.customers.some(function(c){return c.planId===id&&c.status!=='销户'})){toast('仍有客户使用该套餐，请改为下架');return false}
+ if(coll==='addons'&&S.customers.some(function(c){return (c.addons||[]).some(function(x){return x.aid===id})})){toast('仍有客户订购该可选包，请改为下架');return false}
+ if(coll==='agents'&&S.tickets.some(function(t){return t.agentId===id&&t.status!=='已关闭'})){toast('该客服有未结工单，请先流转');return false}
+ if(!force&&!cf('确认删除「'+it.name+'」？',function(){delItem(coll,id,true)}))return false;S[coll]=S[coll].filter(function(x){return x.id!==id});addLog('配置','','删除 '+it.name);save();render();return true}
+
+/* ---- 套餐 / 可选包 组成编辑 ---- */
+function itemsEditor(items){return '<div id="itemsBox">'+(items.length?items:[{pid:'',qty:1}]).map(itemRow).join('')+'</div><div><button class="btn s" type="button" onclick="addItemRow()">＋ 添加商品</button> <span class="muted" style="font-size:12px">数量=份数，实际额度=份数×商品每份规格</span></div>'}
+function itemRow(it){return '<div class="items-row"><select class="ir_p">'+opts(S.products.filter(function(p){return p.on||p.id===it.pid}),it.pid,function(p){return p.name+'（'+p.type+(specText(p)==='-'?'':'，每份'+specText(p))+'）'},'选择商品')+'</select><input class="ir_q" type="number" value="'+(it.qty||1)+'" title="份数"><span class="muted">份</span><button class="btn s d" type="button" onclick="this.parentNode.remove()">✕</button></div>'}
+function addItemRow(){$('itemsBox').insertAdjacentHTML('beforeend',itemRow({pid:'',qty:1}))}
+function readItems(){var out=[];document.querySelectorAll('#itemsBox .items-row').forEach(function(r){var p=r.querySelector('.ir_p').value,q=num(r.querySelector('.ir_q').value);if(p&&q>0)out.push({pid:p,qty:q})});return out}
+function itemsValue(items){return r2(items.reduce(function(s,it){var p=byId(S.products,it.pid);return s+(p?p.price*it.qty:0)},0))}
+
+PAGES.plan=function(){return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgPlan()">＋ 新增套餐</button><span class="muted">套餐内容由「商品库」中的商品自由组合</span></div><div class="tbl-wrap"><table><tr><th>名称</th><th class="right">月租</th><th>合约期</th><th>套餐内容</th><th class="right">商品价值</th><th>超额资费</th><th>用户数</th><th>状态</th><th>操作</th></tr>'+(S.plans.map(function(p){var n=S.customers.filter(function(c){return c.planId===p.id&&c.status!=='销户'}).length;
+ return '<tr><td><b>'+esc(p.name)+'</b></td><td class="right">'+money(p.fee)+'</td><td>'+validityText(p)+'</td><td style="white-space:normal;min-width:220px">'+esc(itemsText(p.items))+'</td><td class="right">'+money(itemsValue(p.items))+'</td><td style="font-size:12px">流量 '+money(p.over.data)+'/GB<br>通话 '+money(p.over.voice)+'/分<br>短信 '+money(p.over.sms)+'/条</td><td>'+n+'</td><td>'+statusBadge(p.status)+'</td><td><button class="btn s" onclick="viewPlan(\''+p.id+'\')">详情</button><button class="btn s" onclick="dlgPlan(\''+p.id+'\')">编辑</button><button class="btn s" onclick="dlgPlan(\''+p.id+'\',1)">复制</button><button class="btn s d" onclick="delItem(\'plans\',\''+p.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=9 class="muted">暂无套餐，点击「＋ 新增套餐」添加</td></tr>')+'</table></div></div>'};
+function dlgPlan(id,copy){var p=id?JSON.parse(JSON.stringify(byId(S.plans,id))):{name:'',fee:39,validity:'',status:'在售',items:[],over:{data:3,voice:0.15,sms:0.1}};if(copy)p.name+='（副本）';
+ openModal(id&&!copy?'编辑套餐':'新增套餐','<div class="form"><div class="f"><label>套餐名称 *</label><input id="pl_n" value="'+esc(p.name)+'"></div><div class="f"><label>月租（元）</label><input id="pl_f" type="number" value="'+p.fee+'"></div><div class="f"><label>合约期/有效期（月）（选填）</label><input id="pl_v" type="number" placeholder="可不填" value="'+esc(p.validity==null?'':p.validity)+'"></div><div class="f"><label>状态</label><select id="pl_s">'+sopts(['在售','下架'],p.status)+'</select></div><div class="f full"><label>套餐内容（从商品库选择）</label>'+itemsEditor(p.items)+'</div><div class="f"><label>超额流量（元/GB）</label><input id="pl_od" type="number" value="'+p.over.data+'"></div><div class="f"><label>超额通话（元/分钟）</label><input id="pl_ov" type="number" value="'+p.over.voice+'"></div><div class="f"><label>超额短信（元/条）</label><input id="pl_os" type="number" value="'+p.over.sms+'"></div></div>',function(){
+  if(!fv('pl_n'))throw new Error('请填写套餐名称');var o={name:fv('pl_n'),fee:num(fv('pl_f')),validity:(fv('pl_v')===''?'':num(fv('pl_v'))),status:fv('pl_s'),items:readItems(),over:{data:num(fv('pl_od')),voice:num(fv('pl_ov')),sms:num(fv('pl_os'))}};
+  if(!o.items.length)throw new Error('请至少选择一个商品');
+  if(id&&!copy){Object.assign(byId(S.plans,id),o);addLog('配置','','修改套餐 '+o.name)}else{o.id=uid('PL');S.plans.push(o);addLog('配置','','新增套餐 '+o.name)}save();toast('套餐已保存')})}
+
+PAGES.addon=function(){return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgAddon()">＋ 新增可选包</button><span class="muted">一次性：订购即扣费、当月有效；包月：订购扣当月，之后每月出账续扣，直到退订</span></div><div class="tbl-wrap"><table><tr><th>名称</th><th>类别</th><th class="right">价格</th><th>计费方式</th><th>内容</th><th>说明</th><th>订购数</th><th>状态</th><th>操作</th></tr>'+(S.addons.map(function(a){var n=S.customers.filter(function(c){return (c.addons||[]).some(function(x){return x.aid===a.id})}).length;
+ return '<tr><td><b>'+esc(a.name)+'</b></td><td>'+esc(addonCat(a))+'</td><td class="right">'+money(a.price)+'</td><td>'+esc(a.cycle)+'</td><td style="white-space:normal;min-width:180px">'+esc(addonSpec(a))+'</td><td>'+esc(a.desc||'')+'</td><td>'+n+'</td><td>'+statusBadge(a.status)+'</td><td><button class="btn s" onclick="dlgAddon(\''+a.id+'\')">编辑</button><button class="btn s d" onclick="delItem(\'addons\',\''+a.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=9 class="muted">暂无可选包</td></tr>')+'</table></div></div>'};
+function dlgAddon(id){var a=id?byId(S.addons,id):{name:'',price:10,cycle:'一次性',status:'在售',items:[],desc:'',cat:'通用'};
+ openModal(id?'编辑可选包':'新增可选包','<div class="form"><div class="f"><label>名称 *</label><input id="ad_n" value="'+esc(a.name)+'"></div><div class="f"><label>价格（元）</label><input id="ad_p" type="number" value="'+a.price+'"></div><div class="f"><label>计费方式</label><select id="ad_c">'+sopts(['一次性','包月'],a.cycle)+'</select></div><div class="f"><label>状态</label><select id="ad_s">'+sopts(['在售','下架'],a.status)+'</select></div><div class="f"><label>类别</label><select id="ad_k">'+sopts(ADDON_CATS,addonCat(a))+'</select></div><div class="f"><label>宽带速率（宽带填写）</label><input id="ad_sp" placeholder="如 300M" value="'+esc(a.speed||'')+'"></div><div class="f"><label>含通话分钟（固定电话填写）</label><input id="ad_mi" type="number" value="'+esc(a.minutes||'')+'"></div><div class="f full"><label>内容（从商品库选择，宽带/固定电话可不选）</label>'+itemsEditor(a.items)+'</div><div class="f full"><label>说明</label><input id="ad_d" value="'+esc(a.desc||'')+'"></div></div>',function(){
+  if(!fv('ad_n'))throw new Error('请填写名称');var o={name:fv('ad_n'),price:num(fv('ad_p')),cycle:fv('ad_c'),status:fv('ad_s'),items:readItems(),desc:fv('ad_d'),cat:fv('ad_k')||'通用',speed:fv('ad_sp').trim(),minutes:num(fv('ad_mi'))};if(o.cat==='宽带'&&!o.speed)throw new Error('请填写宽带速率');if(o.cat==='通用'&&!o.items.length)throw new Error('请至少选择一个商品');
+  if(id){Object.assign(a,o);addLog('配置','','修改可选包 '+o.name)}else{o.id=uid('A');S.addons.push(o);addLog('配置','','新增可选包 '+o.name)}save();toast('已保存')})}
+
+/* ---- 营销活动 ---- */
+function campRule(c){var p=byId(S.products,c.pid);switch(c.type){case '充值赠送':return '充值满 '+c.threshold+' 元赠送 '+c.value+' 元';case '充值分月返还':return '充值满 '+c.threshold+' 元赠送 '+c.value+' 元，'+instRuleText(c);case '满减':return '满 '+c.threshold+' 元减 '+c.value+' 元';case '折扣':return '满 '+c.threshold+' 元打 '+c.value+' 折';case '首月免费':return '开户首月月租全免';case '积分翻倍':return '积分 ×'+c.value;case '赠送商品':return '满 '+c.threshold+' 元赠 '+(p?p.name:'?')+(num(c.value,1)!==1?' ×'+c.value:'')}return ''}
+PAGES.camp=function(){return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgCamp()">＋ 新建活动</button><button class="btn" onclick="doProcessInstalls()">执行到期返还</button><span class="muted">活动默认不参加：办理开户、充值、订购可选包时手动勾选才生效；积分翻倍类活动也可在客户详情「参加营销活动」长期参加（月末出账积分只对已参加的客户翻倍）；客户的套餐和级别都符合活动设置时才能参加；设置了每客户可参加次数的，参加满次数后不再显示</span></div><div class="tbl-wrap"><table><tr><th>活动名称</th><th>类型</th><th>规则</th><th>适用套餐</th><th>适用级别</th><th>每客户次数</th><th>有效期</th><th>状态</th><th class="right">参与次数</th><th class="right">优惠总额</th><th>操作</th></tr>'+(S.campaigns.map(function(c){
+ return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.type)+'</td><td style="white-space:normal;min-width:160px;font-size:12px">'+esc(campRule(c))+'</td><td style="white-space:normal">'+(c.plans&&c.plans.length?c.plans.map(function(id){var p=byId(S.plans,id);return esc(p?p.name:id)}).join('、'):'全部')+'</td><td style="white-space:normal">'+esc(campLevelText(c))+'</td><td>'+campLimitText(c)+'</td><td style="font-size:12px">'+esc(c.start)+'<br>'+esc(c.end)+'</td><td>'+statusBadge(c.status)+(c.status==='启用'&&!campActive(c)?'<br><span class="muted" style="font-size:11px">不在有效期</span>':'')+'</td><td class="right">'+c.uses+'</td><td class="right">'+(c.type==='积分翻倍'?'多发 '+(c.extraPts||0)+' 分':money(c.total))+'</td><td><button class="btn s" onclick="dlgCamp(\''+c.id+'\')">编辑</button><button class="btn s" onclick="toggleCamp(\''+c.id+'\')">'+(c.status==='启用'?'停用':'启用')+'</button><button class="btn s d" onclick="delItem(\'campaigns\',\''+c.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=11 class="muted">暂无营销活动</td></tr>')+'</table></div></div><div class="note">'+CTYPES.map(function(t){return '<b>'+t+'</b>：'+CTYPE_TIP[t]}).join('<br>')+'<br>多个活动可同时命中并叠加（按列表顺序计算）。</div>'};
+function toggleCamp(id){var c=byId(S.campaigns,id);c.status=c.status==='启用'?'停用':'启用';addLog('配置','',c.status+'活动 '+c.name);save();render()}
+function dlgCamp(id){var c=id?byId(S.campaigns,id):{name:'',type:'充值赠送',plans:[],start:today(),end:today().slice(0,4)+'-12-31',threshold:0,value:0,pid:'',status:'启用'};
+ openModal(id?'编辑活动':'新建营销活动','<div class="form"><div class="f"><label>活动名称 *</label><input id="cp_n" value="'+esc(c.name)+'"></div><div class="f"><label>活动类型</label><select id="cp_t" onchange="$(\'cp_tip\').textContent=CTYPE_TIP[this.value];$(\'cp_inst\').style.display=this.value===\'充值分月返还\'?\'contents\':\'none\'">'+sopts(CTYPES,c.type)+'</select></div><div class="f full note" id="cp_tip">'+esc(CTYPE_TIP[c.type])+'</div><div class="f"><label>开始日期</label><input id="cp_s" type="date" value="'+esc(c.start)+'"></div><div class="f"><label>结束日期</label><input id="cp_e" type="date" value="'+esc(c.end)+'"></div><div class="f"><label>条件门槛（元，0=无门槛）</label><input id="cp_th" type="number" value="'+c.threshold+'"></div><div class="f"><label>优惠值（元 / 折 / 倍 / 赠送数量）</label><input id="cp_v" type="number" value="'+c.value+'"></div><div id="cp_inst" style="display:'+(c.type==='充值分月返还'?'contents':'none')+'"><div class="f"><label>返还月数（1–60）</label><input id="cp_m" type="number" min="1" max="60" value="'+(c.months||10)+'"></div><div class="f"><label>每月返还日（1–28 号）</label><input id="cp_d" type="number" min="1" max="28" value="'+(c.day||1)+'"></div></div><div class="f"><label>赠送商品（仅“赠送商品”类型）</label><select id="cp_p">'+opts(S.products,c.pid,null,'不赠送')+'</select></div><div class="f"><label>状态</label><select id="cp_st">'+sopts(['启用','停用'],c.status)+'</select></div><div class="f"><label>每客户可参加次数（空或 0=不限）</label><input id="cp_mt" type="number" min="0" step="1" value="'+(num(c.maxTimes)>0?num(c.maxTimes):'')+'" placeholder="不限"></div><div class="f full"><label>适用套餐（不勾选=全部套餐）</label><div>'+S.plans.map(function(p){return '<label style="display:inline-flex;gap:4px;margin:4px 12px 4px 0;font-size:13px;color:var(--text)"><input type="checkbox" class="cp_pl" value="'+p.id+'"'+(c.plans.indexOf(p.id)>=0?' checked':'')+'>'+esc(p.name)+'</label>'}).join('')+'</div></div><div class="f full"><label>适用客户级别（不勾选=全部级别）</label><div>'+(levelsSorted().map(function(l){return '<label style="display:inline-flex;gap:4px;margin:4px 12px 4px 0;font-size:13px;color:var(--text)"><input type="checkbox" class="cp_lv" value="'+l.id+'"'+((c.levels||[]).indexOf(l.id)>=0?' checked':'')+'>'+esc(l.name)+'</label>'}).join('')||'<span class="muted">暂无客户级别，可在「客户级别」中设置</span>')+'</div></div></div>',function(){
+  if(!fv('cp_n'))throw new Error('请填写活动名称');var pls=[];document.querySelectorAll('.cp_pl:checked').forEach(function(x){pls.push(x.value)});
+  var o={name:fv('cp_n'),type:fv('cp_t'),start:fv('cp_s'),end:fv('cp_e'),threshold:num(fv('cp_th')),value:num(fv('cp_v')),pid:fv('cp_p'),status:fv('cp_st'),plans:pls,levels:[].map.call(document.querySelectorAll('.cp_lv:checked'),function(x){return x.value}),maxTimes:(function(){var m=num(fv('cp_mt'));if(m<0||m!==Math.round(m))throw new Error('每客户可参加次数应为不小于 0 的整数');return m>0?m:''})()};
+  if(o.type==='充值分月返还'){var mm=num(fv('cp_m')),dd=num(fv('cp_d'));if(o.value<=0)throw new Error('请填写赠送总额（优惠值）');if(!(mm>=1&&mm<=60&&mm===Math.round(mm)))throw new Error('返还月数应为 1–60 的整数');if(!(dd>=1&&dd<=28&&dd===Math.round(dd)))throw new Error('每月返还日应为 1–28 的整数');o.months=mm;o.day=dd}
+  if(o.type==='赠送商品'&&!o.pid)throw new Error('请选择赠送商品');if(o.type==='折扣'&&(o.value<=0||o.value>=10))throw new Error('折扣值应在 0–10 之间，如 8.5');if(o.type==='积分翻倍'&&o.value<=1)throw new Error('积分倍数应大于 1');
+  if(o.start&&o.end&&o.start>o.end)throw new Error('结束日期不能早于开始日期');
+  if(id){Object.assign(c,o);addLog('配置','','修改活动 '+o.name)}else{o.id=uid('C');o.uses=0;o.total=0;S.campaigns.push(o);addLog('配置','','新建活动 '+o.name)}save();toast('活动已保存')})}
+
+/* ---- 客户积分 ---- */
+PAGES.points=function(){var r=S.pointRules;
+ var h='<div class="card"><h3>客户积分规则<span class="sp"></span><button class="btn p" onclick="savePointRules()">保存规则</button></h3><div class="form"><div class="f"><label>每消费 1 元获得积分</label><input id="pt_y" type="number" value="'+r.perYuan+'"></div><div class="f"><label>充值每满 100 元奖励积分</label><input id="pt_r" type="number" value="'+r.rechargePer100+'"></div><div class="f"><label>在网时长奖励（每次出账，积分/户）</label><input id="pt_t" type="number" value="'+r.tenurePerMonth+'"></div><div class="f"><label>工单评价奖励客户积分</label><input id="pt_c" type="number" value="'+r.reviewCust+'"></div></div><div class="note" style="margin-top:10px">「积分翻倍」营销活动生效期间，消费积分与充值积分按倍数发放。客服绩效积分规则在「客服与绩效」中设置。</div></div>';
+ var cs=S.customers.slice().sort(function(a,b){return b.points-a.points});
+ h+='<div class="grid g2"><div class="card"><h3>客户积分账户<span class="sp"></span><button class="btn" onclick="dlgRedeem()">积分兑换</button></h3><div class="tbl-wrap"><table><tr><th>客户</th><th class="right">积分</th><th>操作</th></tr>'+cs.map(function(c){return '<tr><td>'+esc(custLabel(c))+'</td><td class="right"><b>'+c.points+'</b></td><td>'+(c.status!=='销户'?'<button class="btn s" onclick="dlgRedeem(\''+c.id+'\')">兑换</button>':'')+'<button class="btn s" onclick="dlgAdjust(\''+c.id+'\')">调整</button></td></tr>'}).join('')+'</table></div></div>';
+ h+='<div class="card"><h3>积分流水（最近100条）</h3><div class="tbl-wrap"><table><tr><th>时间</th><th>客户</th><th class="right">变动</th><th class="right">余额</th><th>原因</th></tr>'+(S.pointLogs.slice(0,100).map(function(p){return '<tr><td>'+p.t+'</td><td>'+esc(custName(p.cid))+'</td><td class="right" style="color:'+(p.delta<0?'var(--bad)':'var(--ok)')+'">'+(p.delta>0?'+':'')+p.delta+'</td><td class="right">'+p.bal+'</td><td>'+esc(p.reason)+'</td></tr>'}).join('')||'<tr><td colspan=5 class="muted">暂无</td></tr>')+'</table></div></div></div>';
+ return h};
+function savePointRules(){S.pointRules={perYuan:num(fv('pt_y')),rechargePer100:num(fv('pt_r')),tenurePerMonth:num(fv('pt_t')),reviewCust:num(fv('pt_c'))};addLog('配置','','修改客户积分规则');save();toast('积分规则已保存');render()}
+function dlgAdjust(cid){var c=byId(S.customers,cid);openModal('手工调整积分 · '+c.name,'<div class="form"><div class="f"><label>变动（正数增加，负数扣减）</label><input id="aj_v" type="number" value="100"></div><div class="f"><label>原因</label><input id="aj_r" value="手工调整"></div></div>',function(){var v=Math.round(num(fv('aj_v')));if(c.points+v<0)throw new Error('积分不能扣成负数');assertNotStopped(c);withUndo('积分调整',cid,function(){addPoints(c,v,fv('aj_r')||'手工调整');addLog('积分调整',cid,'积分调整 '+v+'：'+fv('aj_r'));save()});toast('已调整')})}
+function dlgRedeem(cid){if(cid&&isStopped(byId(S.customers,cid)))return toast(STOP_MSG);var cs=S.customers.filter(function(c){return c.status!=='销户'&&!isStopped(c)});var items=S.mall.filter(function(m){return m.on});
+ openModal('积分兑换','<div class="form"><div class="f full"><label>客户</label><select id="rd_c">'+opts(cs,cid,function(c){return c.name+' '+c.phone+'（'+c.points+' 分）'})+'</select></div><div class="f full"><label>兑换品</label><select id="rd_m">'+opts(items,'',function(m){return m.name+' — '+m.cost+' 分（库存 '+m.stock+'）'})+'</select></div></div>',function(){redeem(fv('rd_c'),fv('rd_m'));toast('兑换成功')},'确认兑换')}
+
+/* ---- 积分商城 ---- */
+PAGES.mall=function(){return '<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgMall()">＋ 新增兑换品</button><button class="btn" onclick="dlgRedeem()">为客户兑换</button><span class="muted">话费类直接加余额；商品类作为当月赠品计入额度</span></div><div class="tbl-wrap"><table><tr><th>名称</th><th>类型</th><th>内容</th><th class="right">所需积分</th><th class="right">库存</th><th>状态</th><th>操作</th></tr>'+(S.mall.map(function(m){var p=byId(S.products,m.pid);
+ return '<tr><td><b>'+esc(m.name)+'</b></td><td>'+esc(m.kind)+'</td><td>'+(m.kind==='话费'?money(m.value)+' 话费':esc((p?p.name:'?')+' ×'+(m.qty||1)+'份'))+'</td><td class="right">'+m.cost+'</td><td class="right">'+m.stock+'</td><td>'+(m.on?'<span class="badge b-ok">上架</span>':'<span class="badge">下架</span>')+'</td><td><button class="btn s" onclick="dlgMall(\''+m.id+'\')">编辑</button><button class="btn s d" onclick="delItem(\'mall\',\''+m.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=7 class="muted">暂无兑换品</td></tr>')+'</table></div></div>'};
+function dlgMall(id){var m=id?byId(S.mall,id):{name:'',kind:'话费',value:10,pid:'',qty:1,cost:1000,stock:100,on:true};
+ openModal(id?'编辑兑换品':'新增兑换品','<div class="form"><div class="f"><label>名称 *</label><input id="ml_n" value="'+esc(m.name)+'"></div><div class="f"><label>类型</label><select id="ml_k">'+sopts(['话费','商品'],m.kind)+'</select></div><div class="f"><label>话费金额（话费类）</label><input id="ml_v" type="number" value="'+(m.value||0)+'"></div><div class="f"><label>商品（商品类）</label><select id="ml_p">'+opts(S.products,m.pid,null,'—')+'</select></div><div class="f"><label>商品份数</label><input id="ml_q" type="number" value="'+(m.qty||1)+'"></div><div class="f"><label>所需积分</label><input id="ml_c" type="number" value="'+m.cost+'"></div><div class="f"><label>库存</label><input id="ml_s" type="number" value="'+m.stock+'"></div><div class="f"><label>状态</label><select id="ml_o"><option value="1"'+(m.on?' selected':'')+'>上架</option><option value="0"'+(!m.on?' selected':'')+'>下架</option></select></div></div>',function(){
+  if(!fv('ml_n'))throw new Error('请填写名称');var o={name:fv('ml_n'),kind:fv('ml_k'),value:num(fv('ml_v')),pid:fv('ml_p'),qty:num(fv('ml_q'),1),cost:Math.max(1,Math.round(num(fv('ml_c')))),stock:Math.round(num(fv('ml_s'))),on:fv('ml_o')==='1'};
+  if(o.kind==='商品'&&!o.pid)throw new Error('请选择商品');
+  if(id)Object.assign(m,o);else{o.id=uid('M');S.mall.push(o)}addLog('配置','',(id?'修改':'新增')+'兑换品 '+o.name);save();toast('已保存')})}
+
+/* ---- 客服 ---- */
+PAGES.agent=function(){var r=S.agentRules;
+ var h='<div class="card"><h3>客服绩效积分规则<span class="sp"></span><button class="btn p" onclick="saveAgentRules()">保存规则</button></h3><div class="form"><div class="f"><label>接单（被指派）</label><input id="ar_a" type="number" value="'+r.assign+'"></div><div class="f"><label>结单（关闭工单）</label><input id="ar_c" type="number" value="'+r.close+'"></div><div class="f"><label>好评（4–5星）</label><input id="ar_g" type="number" value="'+r.good+'"></div><div class="f"><label>差评（1–2星，负数为扣分）</label><input id="ar_b" type="number" value="'+r.bad+'"></div><div class="f"><label>工单流转转出（可填负数）</label><input id="ar_t" type="number" value="'+r.transfer+'"></div></div></div>';
+ var ag=S.agents.slice();
+ h+='<div class="card"><h3>客服人员<span class="sp"></span><button class="btn p" onclick="dlgAgent()">＋ 新增客服</button></h3><div class="tbl-wrap"><table><tr><th>姓名</th><th>班组</th><th>状态</th><th class="right">绩效积分</th><th class="right">处理中</th><th class="right">已结单</th><th class="right">好评率</th><th>操作</th></tr>'+ag.map(function(a,i){var mine=S.tickets.filter(function(t){return t.agentId===a.id}),closed=mine.filter(function(t){return t.status==='已关闭'}),rated=closed.filter(function(t){return t.rating>0}),good=rated.filter(function(t){return t.rating>=4});
+  return '<tr><td><b>'+esc(a.name)+'</b></td><td>'+esc(a.group)+'</td><td>'+statusBadge(a.status)+'</td><td class="right"><b>'+a.points+'</b></td><td class="right">'+(mine.length-closed.length)+'</td><td class="right">'+closed.length+'</td><td class="right">'+(rated.length?Math.round(good.length/rated.length*100)+'%':'-')+'</td><td><button class="btn s" onclick="dlgAgent(\''+a.id+'\')">编辑</button><button class="btn s" onclick="dlgAgentAdj(\''+a.id+'\')">调分</button><button class="btn s d" onclick="delItem(\'agents\',\''+a.id+'\')">删除</button></td></tr>'}).join('')+'</table></div></div>';
+ h+='<div class="card"><h3>客服积分流水（最近100条）</h3><div class="tbl-wrap"><table><tr><th>时间</th><th>客服</th><th class="right">变动</th><th class="right">余额</th><th>原因</th></tr>'+(S.agentLogs.slice(0,100).map(function(l){var a=byId(S.agents,l.aid);return '<tr><td>'+l.t+'</td><td>'+esc(a?a.name:l.aid)+'</td><td class="right" style="color:'+(l.delta<0?'var(--bad)':'var(--ok)')+'">'+(l.delta>0?'+':'')+l.delta+'</td><td class="right">'+l.bal+'</td><td>'+esc(l.reason)+'</td></tr>'}).join('')||'<tr><td colspan=5 class="muted">暂无，处理工单后产生</td></tr>')+'</table></div></div>';
+ return h};
+function saveAgentRules(){S.agentRules={assign:num(fv('ar_a')),close:num(fv('ar_c')),good:num(fv('ar_g')),bad:num(fv('ar_b')),transfer:num(fv('ar_t'))};addLog('配置','','修改客服绩效规则');save();toast('已保存');render()}
+function dlgAgent(id){var a=id?byId(S.agents,id):{name:'',group:'一线客服',status:'在岗'};
+ openModal(id?'编辑客服':'新增客服','<div class="form"><div class="f"><label>姓名 *</label><input id="ag_n" value="'+esc(a.name)+'"></div><div class="f"><label>班组</label><input id="ag_g" value="'+esc(a.group)+'"></div><div class="f"><label>状态</label><select id="ag_s">'+sopts(['在岗','离岗'],a.status)+'</select></div></div>',function(){if(!fv('ag_n'))throw new Error('请填写姓名');var o={name:fv('ag_n'),group:fv('ag_g'),status:fv('ag_s')};if(id)Object.assign(a,o);else{o.id=uid('G');o.points=0;S.agents.push(o)}addLog('配置','',(id?'修改':'新增')+'客服 '+o.name);save();toast('已保存')})}
+function dlgAgentAdj(id){var a=byId(S.agents,id);openModal('调整绩效积分 · '+a.name,'<div class="form"><div class="f"><label>变动</label><input id="aa_v" type="number" value="10"></div><div class="f"><label>原因</label><input id="aa_r" value="主管奖励"></div></div>',function(){addAgentPoints(a,num(fv('aa_v')),fv('aa_r')||'手工调整');save();toast('已调整')})}
+
+/* ---- 数据管理 ---- */
+PAGES.data=function(){var size=0;try{size=(sGet(KEY)||'').length}catch(e){}
+ return '<div class="card"><h3>数据管理</h3>'+(storeOk()?'':'<div class="note" style="margin-bottom:8px;color:var(--bad)">当前环境无法保存数据，关闭后数据会清空。建议用 Safari 等浏览器直接打开本文件。</div>')+'<p class="muted">所有数据仅保存在当前浏览器的本地存储（localStorage，键名 '+KEY+'），约 '+(size/1024).toFixed(1)+' KB，刷新不丢失。换浏览器/设备或清除网站数据会丢失，建议定期导出备份；在另一台设备上可通过“导入 JSON”恢复。</p><div class="toolbar"><button class="btn p" onclick="exportData()">导出 JSON 备份</button><button class="btn" onclick="$(\'importFile\').click()">导入 JSON</button><button class="btn d" onclick="clearAllCustomers()">删除所有客户</button><button class="btn d" onclick="clearAllPlans()">删除所有套餐</button><button class="btn d" onclick="clearAllProducts()">删除所有商品</button><button class="btn d" onclick="clearAllLogs()">清空受理记录</button><button class="btn d" onclick="resetData()">重置为示例数据</button></div></div>'+
+ '<div class="card"><h3>说明</h3><div class="note">本系统为学习/演示用途的模拟 BSS，不连接任何真实运营商系统，不涉及真实号码、证件或支付，不收集密码或银行卡。示例号码统一为 138-0000-xxxx 虚构号段，证件号已脱敏并标注示例。<br>当前统计：客户 '+S.customers.length+' · 商品 '+S.products.length+' · 套餐 '+S.plans.length+' · 可选包 '+S.addons.length+' · 活动 '+S.campaigns.length+' · 兑换品 '+S.mall.length+' · 客服 '+S.agents.length+' · 账单 '+S.bills.length+' · 受理记录 '+S.logs.length+'</div></div>'};
+function exportData(){var blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bss_sim_backup_'+today()+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);toast('已导出备份文件')}
+function importText(t){var o=JSON.parse(t);if(!o||!Array.isArray(o.customers)||!Array.isArray(o.plans)||!Array.isArray(o.products))throw new Error('文件格式不正确');ensureFields(o);S=o;save();page='dash';render()}
+$('importFile').addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){try{importText(rd.result);toast('导入成功')}catch(x){toast('导入失败：'+x.message)}};rd.readAsText(f);e.target.value=''});
+function resetData(force){if(!force&&!cf('确认清空当前数据并恢复示例数据？建议先导出备份。',function(){resetData(true)}))return;seed();ensureFields(S);save();page='dash';render();toast('已重置为示例数据')}
+$('mask').addEventListener('click',function(e){if(e.target.id==='mask')closeModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()});
+
+/* ========== 客户详情 / 套餐详情（整页） ========== */
+function cdItemsTable(items,empty){
+ var rows=(items||[]).map(function(it){var p=byId(S.products,it.pid);if(!p)return '<tr><td colspan=6 class="muted">(已删除商品)</td></tr>';
+  var per=num(p.qty,1),tot=r2(num(it.qty)*per);
+  return '<tr><td><b>'+esc(p.name)+'</b></td><td>'+esc(p.type)+'</td><td>'+esc(specText(p))+'</td><td class="right">'+num(it.qty)+'</td><td class="right">'+esc(amtText(tot,p.unit))+'</td><td class="right">'+money(num(p.price)*num(it.qty))+'</td></tr>'}).join('');
+ return '<div class="tbl-wrap"><table><tr><th>业务（商品）</th><th>类型</th><th>每份规格</th><th class="right">份数</th><th class="right">合计额度</th><th class="right">价值</th></tr>'+(rows||'<tr><td colspan=6 class="muted">'+(empty||'无')+'</td></tr>')+'</table></div>'}
+function tenureText(d){if(!d)return '-';var ms=new Date(today())-new Date(d);var days=Math.max(0,Math.floor(ms/86400000));return days+' 天'+(days>=30?'（约 '+Math.floor(days/30)+' 个月）':'')}
+// 客户参加活动的状态：分月返还有待返期数=正常；长期参加的积分翻倍未退出=正常；其余一次性的=失效
+function campUseStatus(u,c){
+ if(u.type==='充值分月返还'){var ps=(c.installs||[]),p=null;if(u.instId)p=ps.filter(function(x){return x.id===u.instId})[0];
+  if(!p){var linked={};(S.campUses||[]).forEach(function(x){if(x.instId&&x!==u)linked[x.instId]=1});var cand=ps.filter(function(x){return x.campId===u.campId&&!linked[x.id]});p=cand.filter(function(x){return x.t===u.t})[0]||cand[0]||null}
+  var left=p?p.items.filter(function(i){return !i.paid&&!i.cancel}).length:0;return left?{s:'正常',note:'剩 '+left+' 期'}:{s:'失效'}}
+ if(u.scene==='手动参加')return (c.camps||[]).indexOf(u.campId)>=0&&c.status!=='销户'?{s:'正常',note:'长期'}:{s:'失效'};
+ return {s:'失效'}}
+function campUseStatusHtml(u,c){var r=campUseStatus(u,c);return statusBadge(r.s)+(r.note?' <span class="muted" style="font-size:12px">'+esc(r.note)+'</span>':'')}
+function cdSection(title,body,extra){return '<div class="card"><h3>'+title+'<span class="sp"></span>'+(extra||'')+'</h3>'+body+'</div>'}
+// 赠品来源：积分兑换 / 营销活动（旧数据无 src，按 from 判断：只有积分兑换写的是“积分兑换”）
+function isExchGift(g){return g&&(g.src?g.src==='积分兑换':g.from==='积分兑换')}
+function campUsesOf(cid){ensureFields();return S.campUses.filter(function(u){return u.cid===cid})}
+PAGES.custdetail=function(){
+ var q=(sub.cdQ||'').toLowerCase();
+ var list=S.customers.filter(function(c){return !q||(c.name+c.phone).toLowerCase().indexOf(q)>=0});
+ if(sub.cdC&&!byId(S.customers,sub.cdC))sub.cdC='';
+ if(!sub.cdC&&list.length)sub.cdC=list[0].id;
+ var h='<div class="card"><div class="toolbar"><input id="cdQ" placeholder="搜索姓名/号码" value="'+esc(sub.cdQ||'')+'" oninput="sub.cdQ=this.value;rerenderKeep(this)"><select id="cd_c" style="min-width:220px" onchange="sub.cdC=this.value;render()">'+(list.length?opts(list,sub.cdC,custLabel):'<option value="">无匹配客户</option>')+'</select><button class="btn" onclick="go(\'cust\')">返回客户管理</button></div></div>';
+ var c=byId(S.customers,sub.cdC);
+ if(!S.customers.length)return h+'<div class="card"><div class="note">系统里还没有客户，请先到「客户管理」开户。</div><div style="margin-top:10px"><button class="btn p" onclick="go(\'cust\')">去开户</button></div></div>';
+ if(!c)return h+'<div class="card muted">请选择客户</div>';
+ var pl=byId(S.plans,c.planId),qt=quota(c),live=c.status!=='销户';
+ // 基本信息
+ var info='<div class="kv"><div>姓名</div><div><b>'+esc(c.name)+'</b></div><div>号码</div><div class="mono">'+esc(c.phone)+'</div><div>客户级别</div><div>'+levelBadge(c)+(levelOf(c)&&levelOf(c).benefits?' <span class="muted" style="font-size:12px">'+esc(levelOf(c).benefits)+'</span>':'')+'</div><div>证件号</div><div>'+esc(c.idno)+'</div><div>状态</div><div>'+statusBadge(c.status)+'</div>'+(c.pendingPlan?'<div>待生效套餐</div><div>'+esc(pendingPlanText(c))+'</div>':'')+'<div>开户日期</div><div>'+esc(c.openDate)+'</div><div>在网时长</div><div>'+tenureText(c.openDate)+'</div><div>余额</div><div><b style="color:'+(c.balance<0?'var(--bad)':'')+'">'+money(c.balance)+'</b>'+(c.balance<0&&c.status==='在网'&&creditOf(c)?' <span class="muted" style="font-size:12px">（信用额度内欠费）</span>':'')+'</div><div>信用额度</div><div>'+esc(creditText(c))+'</div><div>可用额度</div><div><b>'+money(availBal(c))+'</b> <span class="muted" style="font-size:12px">余额 + 有效信用额度</span></div><div>积分</div><div>'+c.points+'</div></div>';
+ // 办理
+ var ops=live&&isStopped(c)?'<div class="note" style="margin-bottom:8px">客户已停机，仅可充值/复机（也可调整信用额度）</div><div class="toolbar"><button class="btn p" onclick="dlgRecharge(\''+c.id+'\')">充值</button><button class="btn" onclick="doStatus(\''+c.id+'\',\'在网\')">复机</button><button class="btn" onclick="dlgCredit(\''+c.id+'\')">设置信用额度</button><button class="btn" onclick="dlgTicket(\''+c.id+'\')">新建工单</button><button class="btn d" onclick="doStatus(\''+c.id+'\',\'销户\')">销户</button></div>':live?'<div class="toolbar"><button class="btn p" onclick="dlgRecharge(\''+c.id+'\')">充值</button>'+(c.status==='在网'?'<button class="btn" onclick="doStatus(\''+c.id+'\',\'停机\')">停机</button>':'<button class="btn" onclick="doStatus(\''+c.id+'\',\'在网\')">复机</button>')+'<button class="btn" onclick="dlgUsage(\''+c.id+'\')">录入话单</button><button class="btn" onclick="dlgRedeem(\''+c.id+'\')">积分兑换</button><button class="btn" onclick="dlgJoinCamp(\''+c.id+'\')">参加营销活动</button><button class="btn" onclick="dlgChangeLevel(\''+c.id+'\')">调整级别</button><button class="btn" onclick="dlgCredit(\''+c.id+'\')">设置信用额度</button><button class="btn" onclick="dlgTicket(\''+c.id+'\')">新建工单</button><button class="btn d" onclick="doStatus(\''+c.id+'\',\'销户\')">销户</button></div>'+
+  '<div class="toolbar"><select id="d_plan">'+opts(S.plans.filter(function(p){return p.status==='在售'}),c.planId)+'</select><button class="btn" onclick="doChangePlan(\''+c.id+'\')">变更套餐</button></div>'+
+  '<div class="toolbar"><select id="d_addon">'+opts(S.addons.filter(function(a){return a.status==='在售'&&addonCat(a)==='通用'}),'',function(a){return a.name+' '+money(a.price)+'（'+a.cycle+'）'})+'</select><button class="btn" onclick="doOrderAddon(\''+c.id+'\')">订购可选包</button><button class="btn" onclick="dlgBroadband(\''+c.id+'\')">办理宽带/固话</button></div>':'<div class="muted">该客户已销户，不能办理业务。</div>';
+ h+='<div class="grid g2"><div class="card"><h3>基本信息</h3>'+info+'</div><div class="card"><h3>业务办理</h3>'+ops+'</div></div>';
+ // 当前套餐
+ h+=cdSection('当前套餐'+(pl?'：'+esc(pl.name):''),(c.pendingPlan?'<div class="note" style="margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="flex:1">待生效套餐：<b>'+esc(pendingPlanText(c))+'</b></span>'+(c.status!=='销户'?'<button class="btn s d" onclick="doCancelPending(\''+c.id+'\')">取消预约</button>':'')+'</div>':'')+(pl?'<div class="kv" style="margin-bottom:10px"><div>月租</div><div>'+money(pl.fee)+'/月</div><div>合约期</div><div>'+validityText(pl)+'</div><div>状态</div><div>'+statusBadge(pl.status)+'</div><div>超额资费</div><div>流量 '+money(pl.over.data)+'/GB · 通话 '+money(pl.over.voice)+'/分钟 · 短信 '+money(pl.over.sms)+'/条</div></div><h4 style="margin:8px 0">套餐内包含的业务</h4>'+cdItemsTable(pl.items):'<span class="muted">套餐已被删除</span>'),pl?'<a onclick="viewPlan(\''+pl.id+'\')">套餐详情</a>':'');
+ // 可选包
+ var ads=(c.addons||[]).map(function(x){var a=byId(S.addons,x.aid);if(!a)return '';
+  return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><b>'+esc(a.name)+'</b><span class="badge b-pri">'+esc(a.cycle)+'</span><span>'+money(a.price)+'</span><span class="muted" style="font-size:12px">订购：'+esc(x.t||('账期 '+(x.month||x.paid||'-')))+(x.paid?' · 已扣至 '+esc(x.paid):'')+'</span><span style="flex:1"></span>'+(live&&!isStopped(c)?'<button class="btn s d" onclick="doCancelAddon(\''+c.id+'\',\''+a.id+'\')">退订</button>':'')+'</div>'+(addonCat(a)!=='通用'?'<div class="kv"><div>类别</div><div>'+esc(addonCat(a))+'</div>'+(x.bbAcct?'<div>宽带账号</div><div class="mono">'+esc(x.bbAcct)+'</div>':'')+(x.fxNo?'<div>固话号码</div><div class="mono">'+esc(x.fxNo)+'</div>':'')+'<div>'+(addonCat(a)==='宽带'?'速率':'通话分钟')+'</div><div>'+esc(addonCat(a)==='宽带'?(a.speed||'-'):num(a.minutes)+' 分钟/月')+'</div><div>安装地址</div><div>'+esc(x.addr||'-')+'</div></div>':cdItemsTable(a.items))+'</div>'}).join('');
+ h+=cdSection('已订购可选包（'+(c.addons||[]).length+'）',ads||'<span class="muted">未订购可选包</span>');
+ // 赠品
+ var gifts=(c.gifts||[]).filter(function(g){return g.month===S.month&&isExchGift(g)});
+ var exTx=S.txns.filter(function(t){return t.cid===c.id&&t.type==='积分兑换'&&t.month===S.month&&!S.txns.some(function(x){return x.type==='撤单冲正'&&x.cid===c.id&&String(x.desc||'').indexOf('冲正 '+t.no)===0})});
+ h+=cdSection('当月积分兑换详情','<div class="tbl-wrap"><table><tr><th>商品</th><th>类型</th><th class="right">数量</th><th>来源</th><th>账期</th></tr>'+(gifts.map(function(g){var p=byId(S.products,g.pid);return '<tr><td>'+esc(p?p.name:'(已删除商品)')+'</td><td>'+esc(p?p.type:'-')+'</td><td class="right">'+esc(amtText(num(g.qty)*(p?num(p.qty,1):1),p?p.unit:''))+'</td><td>积分兑换</td><td>'+esc(g.month)+'</td></tr>'}).join('')+exTx.map(function(t){return '<tr><td>'+esc(String(t.desc||'').replace(/^兑换话费\s*/,''))+'</td><td>话费</td><td class="right">'+money(t.amount)+'</td><td>积分兑换</td><td>'+esc(t.month)+'</td></tr>'}).join('')||'<tr><td colspan=5 class="muted">本月无积分兑换</td></tr>')+'</table></div>');
+ // 营销活动
+ var cu=campUsesOf(c.id).slice().sort(function(a,b){return a.t<b.t?1:-1});
+ var camps={};cu.forEach(function(u){camps[u.campName]=1});
+ h+=cdSection('参加的营销活动（'+Object.keys(camps).length+' 个活动 / '+cu.length+' 次）','<div class="tbl-wrap"><table><tr><th>参与时间</th><th>活动名称</th><th>状态</th><th>受理途径</th><th>优惠 / 赠送内容</th><th class="right">金额</th></tr>'+(cu.map(function(u){return '<tr><td>'+esc(u.t)+'</td><td><b>'+esc(u.campName)+'</b></td><td>'+campUseStatusHtml(u,c)+'</td><td><span class="badge b-pri">'+esc(u.scene)+'</span></td><td style="white-space:normal;min-width:160px">'+esc(u.desc)+'</td><td class="right">'+(u.amount?money(u.amount):'-')+'</td></tr>'}).join('')||'<tr><td colspan=6 class="muted">未参加营销活动</td></tr>')+'</table></div>');
+ if((c.installs||[]).length)h+=cdSection('分月返还计划（'+c.installs.length+'）',installTable(c),'<a onclick="doProcessInstalls()">执行到期返还</a>');
+ h+=cdSection('级别变更记录（'+(c.levelHist||[]).length+'）','<div class="tbl-wrap"><table><tr><th>时间</th><th>变更</th><th>方式</th><th>原因</th><th>操作员</th></tr>'+((c.levelHist||[]).map(function(x){return '<tr><td>'+esc(x.t)+'</td><td><span class="badge '+(x.dir==='升级'?'b-ok':'b-warn')+'">'+esc(x.dir)+'</span> '+esc(x.from)+' → '+esc(x.to)+'</td><td>'+esc(x.how)+'</td><td style="white-space:normal;min-width:200px">'+esc(x.reason||'')+'</td><td>'+esc(x.op||'-')+'</td></tr>'}).join('')||'<tr><td colspan=5 class="muted">暂无级别变更</td></tr>')+'</table></div>');
+ // 用量
+ function ub(label,u,qq,unit){var pct=qq>0?Math.min(100,u/qq*100):(u>0?100:0);return '<div class="bar"><span class="bl">'+label+'</span><span class="bt"><span class="bf" style="display:block;width:'+pct+'%;background:'+(u>qq?'var(--bad)':'var(--pri)')+'"></span></span><b style="min-width:110px;text-align:right">'+u+' / '+qq+' '+unit+'</b></div>'}
+ function ubBlock(label,key){var bd=usageBreakdown(c,key),un=QUNIT[key],u=num(c.usage[key]);
+  var tp=qt[key]>0?Math.min(100,u/qt[key]*100):(u>0?100:0);var h2='<div style="margin-bottom:12px"><div class="bar"><span class="bl" style="width:auto;min-width:236px"><b>'+label+'合计</b></span><span class="bt"><span class="bf" style="display:block;width:'+tp+'%;background:'+(u>qt[key]?'var(--bad)':'var(--pri)')+'"></span></span><b style="min-width:110px;text-align:right">'+r2(u)+' / '+qt[key]+' '+un+'</b></div>';
+  h2+=bd.rows.map(function(x){var pct=x.amt>0?Math.min(100,x.used/x.amt*100):0;return '<div class="bar" style="padding-left:16px"><span class="bl" style="width:220px;white-space:normal" title="'+esc(x.srcName)+'"><span class="badge'+(x.src==='套餐'?'':' b-pri')+'" style="margin-right:6px">'+esc(x.src)+'</span>'+esc(x.name)+'</span><span class="bt"><span class="bf" style="display:block;width:'+pct+'%"></span></span><b style="min-width:110px;text-align:right">'+x.used+' / '+x.amt+' '+un+'</b></div>'}).join('');
+  if(bd.over>0)h2+='<div class="bar" style="padding-left:16px"><span class="bl" style="width:220px;white-space:normal;color:var(--bad)">超出额度（按超额资费计费）</span><span class="bt"></span><b style="min-width:110px;text-align:right;color:var(--bad)">'+bd.over+' '+un+'</b></div>';
+  if(!bd.rows.length)h2+='<div class="muted" style="font-size:12px;padding-left:16px">无'+label+'额度</div>';
+  return h2+'</div>'}
+ h+=cdSection('本月用量与额度（账期 '+S.month+'）',ubBlock('流量','data')+ubBlock('通话','voice')+ubBlock('短信','sms')+'<div class="muted" style="font-size:12px">用量按“套餐 → 可选包 → 赠品”的顺序扣减，全部用完后的部分按套餐超额资费计费。</div>');
+ // 账单
+ var bs=S.bills.filter(function(b){return b.cid===c.id}).slice(0,10);
+ h+=cdSection('最近账单','<div class="tbl-wrap"><table><tr><th>账单号</th><th>账期</th><th>类型</th><th>明细</th><th class="right">合计</th></tr>'+(bs.map(function(b){return '<tr><td class="mono">'+b.no+'</td><td>'+b.month+'</td><td>'+esc(b.note)+(b.voided?' <span class="badge b-warn">已撤单</span>':'')+'</td><td style="white-space:normal;min-width:220px">'+b.items.map(function(i){return esc(i.name)+'：'+money(i.amt)}).join('<br>')+'</td><td class="right"><b>'+money(b.total)+'</b></td></tr>'}).join('')||'<tr><td colspan=5 class="muted">暂无账单</td></tr>')+'</table></div>');
+ h+=cdSection('最近受理记录',logTable(S.logs.filter(function(l){return l.cid===c.id}).slice(0,15)));
+ var ts=S.tickets.filter(function(t){return t.cid===c.id});
+ h+=cdSection('工单（'+ts.length+'）','<div class="tbl-wrap"><table><tr><th>工单号</th><th>时间</th><th>分类</th><th>标题</th><th>客服</th><th>状态</th><th>评价</th></tr>'+(ts.map(function(t){var a=byId(S.agents,t.agentId);return '<tr><td class="mono"><a onclick="dlgTicketView(\''+t.id+'\')">'+t.no+'</a></td><td>'+t.t+'</td><td>'+esc(t.cat)+'</td><td>'+esc(t.title)+(t.undoLog?'<div class="muted mono" style="font-size:11px">撤 '+esc(t.undoLog)+'</div>':'')+'</td><td>'+esc(a?a.name:'-')+'</td><td>'+statusBadge(t.status)+'</td><td>'+(t.rating?'★'.repeat(t.rating):'-')+'</td></tr>'}).join('')||'<tr><td colspan=7 class="muted">暂无工单</td></tr>')+'</table></div>');
+ return h};
+function viewPlan(pid){closeModal();sub.pdP=pid;go('plandetail')}
+PAGES.plandetail=function(){
+ if(!S.plans.length)return '<div class="card"><div class="note">还没有套餐，请先到「套餐管理」新增。</div></div>';
+ if(!sub.pdP||!byId(S.plans,sub.pdP))sub.pdP=S.plans[0].id;var p=byId(S.plans,sub.pdP);
+ var h='<div class="card"><div class="toolbar"><select style="min-width:220px" onchange="sub.pdP=this.value;render()">'+opts(S.plans,p.id,function(x){return x.name+'（'+money(x.fee)+'/月，'+x.status+'）'})+'</select><button class="btn" onclick="dlgPlan(\''+p.id+'\')">编辑套餐</button><button class="btn" onclick="go(\'plan\')">返回套餐管理</button></div></div>';
+ var cs=S.customers.filter(function(c){return c.planId===p.id&&c.status!=='销户'}),online=cs.filter(function(c){return c.status==='在网'}).length;
+ var billed=0;S.bills.forEach(function(b){b.items.forEach(function(i){if(i.name.indexOf('月租（'+p.name+'）')>=0)billed+=num(i.amt)})});
+ h+='<div class="grid g4">'+kpi('用户数',cs.length,'在网 '+online+' 户')+kpi('预计月租收入',money(p.fee*cs.length),'月租 × 用户数')+kpi('累计已出账月租',money(billed),'含开户首月（优惠前）')+kpi('套餐业务价值',money(itemsValue(p.items)),'按商品单价合计')+'</div>';
+ h+='<div class="grid g2" style="margin-top:16px"><div class="card"><h3>基本信息</h3><div class="kv"><div>套餐编号</div><div class="mono">'+p.id+'</div><div>套餐名称</div><div><b>'+esc(p.name)+'</b></div><div>月租</div><div>'+money(p.fee)+'/月</div><div>合约期</div><div>'+validityText(p)+'</div><div>状态</div><div>'+statusBadge(p.status)+'</div></div></div><div class="card"><h3>超额资费</h3><div class="kv"><div>超额流量</div><div>'+money(p.over.data)+' / GB</div><div>超额通话</div><div>'+money(p.over.voice)+' / 分钟</div><div>超额短信</div><div>'+money(p.over.sms)+' / 条</div></div></div></div>';
+ h+=cdSection('套餐内包含的业务（'+p.items.length+' 项）',cdItemsTable(p.items));
+ ensureFields();var cids={};cs.forEach(function(c){cids[c.id]=1});var cu=S.campUses.filter(function(u){return cids[u.cid]});var cmap={},corder=[];cu.forEach(function(u){var k=u.campId||u.campName;if(!cmap[k]){cmap[k]={id:u.campId,name:u.campName,type:u.type,n:0,amt:0,cust:{}};corder.push(k)}cmap[k].n++;cmap[k].amt+=num(u.amount);cmap[k].cust[u.cid]=1});
+ h+=cdSection('已订购的营销活动（'+corder.length+'）','<div class="tbl-wrap"><table><tr><th>活动</th><th>类型</th><th>规则</th><th>有效期</th><th class="right">订购客户数</th><th class="right">参与次数</th><th class="right">优惠金额</th></tr>'+corder.map(function(k){var m=cmap[k],c=byId(S.campaigns,m.id);return '<tr><td><b>'+esc(c?c.name:m.name||'')+'</b></td><td>'+esc(c?c.type:m.type||'')+'</td><td style="white-space:normal;min-width:150px">'+(c?esc(campRule(c)):'')+'</td><td style="font-size:12px">'+(c?esc(c.start)+' 至 '+esc(c.end):'')+'</td><td class="right">'+Object.keys(m.cust).length+'</td><td class="right">'+m.n+'</td><td class="right">'+(m.amt?money(m.amt):'')+'</td></tr>'}).join('')+'</table></div>');
+ var ads=S.addons.filter(function(a){return cs.some(function(c){return (c.addons||[]).some(function(x){return x.aid===a.id})})});
+ h+=cdSection('已订购的可选包（'+ads.length+'）',ads.map(function(a){var n=cs.filter(function(c){return (c.addons||[]).some(function(x){return x.aid===a.id})}).length;return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><b>'+esc(a.name)+'</b><span class="badge b-pri">'+esc(a.cycle)+'</span><span>'+money(a.price)+'</span><span class="muted" style="font-size:12px">订购客户 '+n+' 户</span></div>'+cdItemsTable(a.items)+'</div>'}).join('')||'');
+ h+=cdSection('订购该套餐的客户（'+cs.length+'）','<div class="tbl-wrap"><table><tr><th>姓名</th><th>号码</th><th>状态</th><th>开户日期</th><th class="right">余额</th><th>可选包</th><th></th></tr>'+(cs.map(function(c){return '<tr><td><a onclick="dlgCust(\''+c.id+'\')">'+esc(c.name)+'</a></td><td class="mono">'+esc(c.phone)+'</td><td>'+statusBadge(c.status)+'</td><td>'+esc(c.openDate)+'</td><td class="right">'+money(c.balance)+'</td><td>'+((c.addons||[]).map(function(x){var a=byId(S.addons,x.aid);return a?esc(a.name):''}).join('、')||'-')+'</td><td><button class="btn s" onclick="dlgCust(\''+c.id+'\')">客户详情</button></td></tr>'}).join('')||'<tr><td colspan=7 class="muted">暂无客户订购</td></tr>')+'</table></div>');
+ return h};
+
+/* ========== 撤单（业务回退） ========== */
+// 原理：办理前记录客户快照与全局统计，办理后记录“办理后快照”和新增的流水/账单/活动参与，挂在该笔受理记录的 undo 上。
+// 只有客户当前数据与“办理后快照”完全一致（即此后没有其他业务改动过该客户）时才允许撤单，因此只能按时间倒序逐笔撤。
+function undoHeads(){return {txns:S.txns[0]||null,pointLogs:S.pointLogs[0]||null,campUses:(S.campUses||[])[0]||null,bills:S.bills[0]||null,logs:S.logs[0]||null}}
+function newSince(arr,head){var out=[];for(var i=0;i<(arr||[]).length;i++){if(arr[i]===head)break;out.push(arr[i])}return out}
+function campStat(){var m={};S.campaigns.forEach(function(c){m[c.id]={uses:c.uses||0,total:c.total||0,extraPts:c.extraPts||0}});return m}
+function mallStat(){var m={};S.mall.forEach(function(x){m[x.id]=x.stock});return m}
+function withUndo(kind,cid,fn){
+ var c0=cid?byId(S.customers,cid):null;
+ var sn={before:c0?JSON.stringify(c0):null,heads:undoHeads(),camp:campStat(),mall:mallStat(),rev:JSON.parse(JSON.stringify(S.monthRevenue||{}))};
+ var res=fn();
+ try{
+  var logs=newSince(S.logs,sn.heads.logs);if(!logs.length)return res;
+  var main=logs[logs.length-1];var ccid=cid||(res&&res.cust&&res.cust.id)||main.cid;var c=byId(S.customers,ccid);if(!c)return res;
+  var txns=newSince(S.txns,sn.heads.txns).filter(function(t){return t.cid===ccid});
+  var pls=newSince(S.pointLogs,sn.heads.pointLogs).filter(function(p){return p.cid===ccid});
+  var cus=newSince(S.campUses||[],sn.heads.campUses).filter(function(u){return u.cid===ccid});
+  var bills=newSince(S.bills,sn.heads.bills).filter(function(b){return b.cid===ccid});
+  var cd={},cn=campStat();Object.keys(cn).forEach(function(k){var o=sn.camp[k]||{uses:0,total:0,extraPts:0};var d={uses:cn[k].uses-o.uses,total:r2(cn[k].total-o.total),extraPts:cn[k].extraPts-o.extraPts};if(d.uses||d.total||d.extraPts)cd[k]=d});
+  var md={},mn=mallStat();Object.keys(mn).forEach(function(k){var d=mn[k]-(sn.mall[k]==null?mn[k]:sn.mall[k]);if(d)md[k]=d});
+  var rd={};Object.keys(S.monthRevenue||{}).forEach(function(k){var d=r2(S.monthRevenue[k]-(sn.rev[k]||0));if(d)rd[k]=d});
+  pls.forEach(function(p){if(!p.id)p.id=uid('PG')});
+  var oid=uid('OD');
+  main.undo={id:oid,kind:kind,cid:ccid,before:sn.before,after:JSON.stringify(c),txns:txns.map(function(t){return {no:t.no,type:t.type,amount:t.amount,desc:t.desc}}),points:pls.map(function(p){return {id:p.id,delta:p.delta,reason:p.reason}}),campUses:cus.map(function(u){return u.id}),bills:bills.map(function(b){return b.no}),campDelta:cd,mallDelta:md,revDelta:rd};
+  logs.forEach(function(l){if(l!==main)l.grp=main.no});
+  save();
+ }catch(e){}
+ return res;
+}
+var UNDO_BLOCK_MSG='需先撤后续业务，或使用有跨单撤单权限的操作员';
+function hasCrossUndo(){var o=curOp();return !!(o&&o.crossUndo)}
+// 跨单撤单：只回退这一笔业务自身造成的变化（按撤单快照前后差异反向处理），不动之后的业务
+function crossCheck(l,apply){
+ function no(r){return {ok:false,reason:r}}
+ if(!l||!l.undo)return no('该记录不支持撤单');if(l.undone)return no('该记录已撤单');
+ var u=l.undo,c=byId(S.customers,u.cid);if(!c)return no('客户不存在');
+ if(c.status==='销户')return no('客户已销户，不能撤单');
+ if(!u.before)return no('开户业务需先撤销该客户之后的全部业务');
+ var idx=S.logs.indexOf(l);for(var i=0;i<idx;i++){if(S.logs[i].type==='出账')return no('该业务之后已执行月末出账，不能撤单')}
+ var b=JSON.parse(u.before),a=JSON.parse(u.after),notes=[],ops=[];
+ function J(x){return JSON.stringify(x===undefined?null:x)}
+ var dBal=r2(num(a.balance)-num(b.balance)),dPts=num(a.points)-num(b.points);
+ if(dPts&&num(c.points)-dPts<0)return no('撤销需扣回 '+dPts+' 积分，但客户当前只有 '+c.points+' 分（积分已被使用）');
+ if(dBal)notes.push(dBal>0?'扣回余额 '+money(dBal):'退回余额 '+money(-dBal));if(dPts)notes.push(dPts>0?'扣回积分 '+dPts:'退回积分 '+(-dPts));
+ // 可选包
+ var ba=(b.addons||[]).map(function(x){return x.aid}),aa=(a.addons||[]).map(function(x){return x.aid}),ca=(c.addons||[]).map(function(x){return x.aid});
+ var addA=aa.filter(function(x){return ba.indexOf(x)<0}),remA=ba.filter(function(x){return aa.indexOf(x)<0});
+ for(var k=0;k<addA.length;k++){if(ca.indexOf(addA[k])<0)return no('这笔订购的可选包之后已被退订，不能再撤')}
+ for(k=0;k<remA.length;k++){if(ca.indexOf(remA[k])>=0)return no('这笔退订的可选包之后又重新订购了，不能再撤')}
+ if(addA.length||remA.length)notes.push('恢复可选包订购状态');
+ // 赠品
+ var bg=(b.gifts||[]).map(J),ag=(a.gifts||[]).map(J),cg=(c.gifts||[]).map(J);var addG=ag.filter(function(x){return bg.indexOf(x)<0}),remG=bg.filter(function(x){return ag.indexOf(x)<0});
+ for(k=0;k<addG.length;k++){if(cg.indexOf(addG[k])<0)return no('这笔业务的赠品已失效，不能再撤')}
+ if(addG.length||remG.length)notes.push('收回/恢复赠品');
+ // 长期活动
+ var bc=b.camps||[],ac=a.camps||[],cc=c.camps||[];var addC=ac.filter(function(x){return bc.indexOf(x)<0}),remC=bc.filter(function(x){return ac.indexOf(x)<0});
+ for(k=0;k<addC.length;k++){if(cc.indexOf(addC[k])<0)return no('这笔参加的活动之后已退出，不能再撤')}
+ for(k=0;k<remC.length;k++){if(cc.indexOf(remC[k])>=0)return no('这笔退出的活动之后又重新参加了，不能再撤')}
+ // 分月返还
+ var bi=(b.installs||[]).map(function(x){return x.id}),addI=(a.installs||[]).filter(function(x){return bi.indexOf(x.id)<0});
+ for(k=0;k<addI.length;k++){var ci=(c.installs||[]).filter(function(x){return x.id===addI[k].id})[0];if(ci&&ci.items.some(function(i){return i.paid}))return no('这笔充值的分月返还已经返过，不能再撤')}
+ if(addI.length)notes.push('取消分月返还计划');
+ // 套餐、级别、其它字段：之后没再变动才能恢复
+ var handled={id:1,balance:1,points:1,addons:1,gifts:1,camps:1,installs:1,levelHist:1,usage:1,status:1};
+ var keys={};Object.keys(a).concat(Object.keys(b)).forEach(function(x){keys[x]=1});
+ var restore=[];
+ for(var key in keys){if(handled[key]||J(a[key])===J(b[key]))continue;
+  if(J(c[key])!==J(a[key]))return no(key==='planId'?'该客户之后又变更过套餐，不能再撤这笔':key==='levelId'?'该客户的级别之后又有变动，不能再撤这笔':'该客户的相关信息之后又有变动，不能再撤这笔');
+  restore.push(key)}
+ if(restore.indexOf('planId')>=0){var pp=byId(S.plans,b.planId);notes.push('恢复原套餐：'+(pp?pp.name:'-'))}
+ if(restore.indexOf('levelId')>=0){var lv=byId(S.levels||[],b.levelId);notes.push('恢复原级别：'+(lv?lv.name:'-'))}
+ var bh=(b.levelHist||[]).map(J),addH=(a.levelHist||[]).map(J).filter(function(x){return bh.indexOf(x)<0});
+ var nb=r2(num(c.balance)-dBal);
+ if(a.status!==b.status&&c.status!==a.status)return no('客户状态之后又有变动（'+a.status+' → '+c.status+'），不能再撤这笔');
+ var stTo=null;if(a.status!==b.status)stTo=b.status;
+ var ncr=creditOf(c);var finalSt=stTo||c.status;if(nb< -ncr&&finalSt==='在网')finalSt='欠费停机';else if(nb>= -ncr&&finalSt==='欠费停机')finalSt='在网';
+ if(finalSt!==c.status)notes.push('状态：'+c.status+' → '+finalSt+(nb< -ncr?'（撤销后余额 '+money(nb)+'，超出信用额度，欠费停机）':''));
+ var text=(notes.length?notes.join('；'):'无客户余额/积分变化')+'。之后的业务保持不变';
+ if(!apply)return {ok:true,text:text,bal:-dBal,pts:-dPts};
+ c.balance=nb;c.points=num(c.points)-dPts;
+ if(addA.length)c.addons=(c.addons||[]).filter(function(x){return addA.indexOf(x.aid)<0});
+ remA.forEach(function(id){var o=(b.addons||[]).filter(function(x){return x.aid===id})[0];if(o)c.addons=(c.addons||[]).concat([o])});
+ if(addG.length){var left=addG.slice();c.gifts=(c.gifts||[]).filter(function(g){var i=left.indexOf(J(g));if(i>=0){left.splice(i,1);return false}return true})}
+ remG.forEach(function(g){c.gifts=(c.gifts||[]).concat([JSON.parse(g)])});
+ if(addC.length||remC.length)c.camps=(c.camps||[]).filter(function(x){return addC.indexOf(x)<0}).concat(remC);
+ if(addI.length){var ids=addI.map(function(x){return x.id});c.installs=(c.installs||[]).filter(function(x){return ids.indexOf(x.id)<0})}
+ restore.forEach(function(key){if(b[key]===undefined)delete c[key];else c[key]=JSON.parse(J(b[key]))});
+ if(addH.length)c.levelHist=(c.levelHist||[]).filter(function(x){return addH.indexOf(J(x))<0});
+ if(b.usage&&a.usage&&c.usage)['data','voice','sms'].forEach(function(k2){var d=num(a.usage[k2])-num(b.usage[k2]);if(d)c.usage[k2]=r2(Math.max(0,num(c.usage[k2])-d))});
+ c.status=finalSt;
+ return {ok:true,text:text,bal:-dBal,pts:-dPts}}
+var OPEN_BLOCK_MSG='需先撤后续业务，或使用有撤销开户权限的操作员';
+function hasUndoOpen(){var o=curOp();return !!(o&&o.undoOpen)}
+// 撤销开户（连带撤销）：撤销开户以及该客户之后的全部业务
+function undoOpenCheck(l){function no(r){return {ok:false,reason:r}}
+ if(!l||l.type!=='开户'||!l.undo||l.undo.before)return no('不是开户记录');if(l.undone)return no('该开户已撤销');
+ var c=byId(S.customers,l.undo.cid);if(!c)return no('客户不存在');if(c.status==='销户')return no('客户已销户，不能撤销开户');
+ var idx=S.logs.indexOf(l);for(var i=0;i<idx;i++){if(S.logs[i].type==='出账')return no('该客户开户后已执行过月末出账（'+S.logs[i].t+'），出账后的账务不能回退，不能撤销开户')}
+ var later=S.logs.slice(0,idx).filter(function(x){return x.cid===c.id&&!x.undone&&x.type!=='撤单'&&x.grp!==l.no});
+ var biz=later.filter(function(x){return !x.grp});
+ var pend=0;(c.installs||[]).forEach(function(p){p.items.forEach(function(it){if(!it.paid&&!it.cancel)pend++})});
+ var tks=(S.tickets||[]).filter(function(t){return t.cid===c.id});
+ var cus=(S.campUses||[]).filter(function(u){return u.cid===c.id});
+ var lines=['连带撤销该客户开户后的 '+biz.length+' 笔业务','客户从系统中移除（受理记录保留，标为已撤单）','余额 '+money(c.balance)+' 清零（开户预存及之后的充值按撤单冲正处理）','积分 '+c.points+' 分清零','已订购可选包 '+(c.addons||[]).length+' 个取消','营销活动参与记录 '+cus.length+' 条删除并减回活动统计','分月返还待返 '+pend+' 期取消','相关工单 '+tks.length+' 张关闭','开户及之后业务产生的收入、兑换品库存按原路减回'];
+ return {ok:true,later:later,biz:biz,text:lines.join('；'),c:c}}
+function undoOpenCascade(no){var l=S.logs.filter(function(x){return x.no===no})[0];
+ if(!hasUndoOpen())throw new Error(OPEN_BLOCK_MSG);var ck=undoOpenCheck(l);if(!ck.ok)throw new Error(ck.reason);
+ var c=ck.c,all=ck.later.concat([l]),n=ck.biz.length;
+ all.forEach(function(x){var u=x.undo;if(!u)return;
+  u.txns.slice().reverse().forEach(function(t){if(t.amount)addTxn(c.id,'撤单冲正',-t.amount,'冲正 '+t.no+'（'+t.type+'：'+t.desc+'）')});
+  Object.keys(u.campDelta||{}).forEach(function(k){var cp=byId(S.campaigns,k);if(!cp)return;var d=u.campDelta[k];cp.uses=Math.max(0,(cp.uses||0)-d.uses);cp.total=r2((cp.total||0)-d.total);if(d.extraPts)cp.extraPts=(cp.extraPts||0)-d.extraPts});
+  Object.keys(u.mallDelta||{}).forEach(function(k){var m=byId(S.mall,k);if(m)m.stock-=u.mallDelta[k]});
+  Object.keys(u.revDelta||{}).forEach(function(k){S.monthRevenue[k]=r2((S.monthRevenue[k]||0)-u.revDelta[k])});
+  S.bills.forEach(function(bl){if((u.bills||[]).indexOf(bl.no)>=0)bl.voided=true})});
+ // 未被单笔撤单覆盖的流水（如分月返还到账），按撤单冲正处理
+ S.txns.filter(function(t){return t.cid===c.id&&t.type==='活动返还'&&!t.revByOpen}).forEach(function(t){t.revByOpen=true;addTxn(c.id,'撤单冲正',-t.amount,'冲正 '+t.no+'（'+t.type+'：'+t.desc+'）')});
+ if(c.points)S.pointLogs.unshift({id:uid('PG'),t:nowStr(),month:S.month,cid:c.id,delta:-c.points,reason:'撤销开户，积分清零',bal:0,rev:true});
+ S.campUses=(S.campUses||[]).filter(function(u){return u.cid!==c.id});
+ (S.tickets||[]).forEach(function(t){if(t.cid!==c.id)return;delete t.undoLog;if(t.status!=='已关闭'){t.status='已关闭';(t.flow=t.flow||[]).push({t:nowStr(),op:opName(),dept:opDept(),text:'客户开户已撤销，工单关闭'})}});
+ var ts=nowStr();all.forEach(function(x){x.undone=true;x.undoneAt=ts;x.cascadeOf=l.no});S.logs.forEach(function(x){if(x.grp&&all.some(function(y){return y.no===x.grp})){x.undone=true;x.cascadeOf=l.no}});l.openCascade=n;
+ if(!Array.isArray(S.removedCusts))S.removedCusts=[];S.removedCusts.push({id:c.id,name:c.name,phone:c.phone,t:ts,balance:c.balance,points:c.points});
+ var bal=c.balance,pts=c.points;S.customers=S.customers.filter(function(x){return x.id!==c.id});
+ addLog('撤单',c.id,'撤销开户（连带撤销 '+n+' 笔业务）：'+l.no+'，客户 '+c.name+' '+c.phone+' 已移除，余额 '+money(bal)+' 和积分 '+pts+' 分清零，活动统计、收入、库存已减回');
+ save();return {n:n}}
+function dlgUndoOpen(no){var l=S.logs.filter(function(x){return x.no===no})[0];if(!l)return;
+ if(!hasUndoOpen())return toast(OPEN_BLOCK_MSG);var ck=undoOpenCheck(l);if(!ck.ok)return toast(ck.reason);
+ openModal('撤销开户确认','<div class="kv"><div>受理单号</div><div class="mono">'+esc(l.no)+'</div><div>客户</div><div>'+esc(custName(l.cid))+'</div><div>开户时间</div><div>'+esc(l.t)+'</div><div>当前余额</div><div>'+money(ck.c.balance)+'</div><div>当前积分</div><div>'+ck.c.points+'</div></div>'+
+  '<div class="note" style="margin-top:12px"><b>撤销开户（当前操作员 '+esc(opName())+' 有撤销开户权限）将：</b><br>'+ck.text.split('；').map(function(x){return '· '+esc(x)}).join('<br>')+
+  (ck.biz.length?'<br><br><b>将连带撤销的业务：</b><br>'+ck.biz.slice(0,15).map(function(x){return '· '+esc(x.t.slice(5,16)+' '+x.type+'：'+String(x.desc||'').slice(0,40))}).join('<br>')+(ck.biz.length>15?'<br>· 等共 '+ck.biz.length+' 笔':''):'')+'<br><br>撤销后不可恢复。</div>',function(){var r=undoOpenCascade(no);toast('已撤销开户，连带撤销 '+r.n+' 笔业务')},'确认撤销开户')}
+function canUndoAny(l){return canUndo(l)||(hasCrossUndo()&&crossCheck(l).ok)}
+function canUndo(l){if(!l||!l.undo||l.undone)return false;var c=byId(S.customers,l.undo.cid);return !!c&&JSON.stringify(c)===l.undo.after}
+function undoPreview(l){var u=l.undo,c=byId(S.customers,u.cid);
+ if(!u.before){var pre=u.txns.filter(function(t){return t.type==='预存'}).reduce(function(s,t){return s+t.amount},0);return {bal:r2(pre),pts:-c.points,text:'撤销开户：客户改为销户，退回预存款 '+money(pre)+'（首月月租冲正），扣回本次所得积分 '+c.points+' 分，活动统计减回'}}
+ var b=JSON.parse(u.before);var dBal=r2(b.balance-c.balance),dPts=b.points-c.points;var extra=[];
+ if(b.planId!==c.planId){var p=byId(S.plans,b.planId);extra.push('恢复原套餐：'+(p?p.name:b.planId))}
+ if(b.status!==c.status)extra.push('恢复状态：'+c.status+' → '+b.status);
+ if(JSON.stringify(b.usage)!==JSON.stringify(c.usage))extra.push('扣回用量');
+ if(JSON.stringify(b.addons)!==JSON.stringify(c.addons))extra.push('恢复可选包订购状态');
+ if(JSON.stringify(b.gifts)!==JSON.stringify(c.gifts))extra.push('收回赠品/兑换品');
+ if(Object.keys(u.mallDelta||{}).length)extra.push('兑换品库存加回');
+ return {bal:dBal,pts:dPts,text:(dBal?(dBal>0?'退回余额 '+money(dBal):'扣回余额 '+money(-dBal)):'余额不变')+'；'+(dPts?(dPts>0?'退回积分 '+dPts:'扣回积分 '+(-dPts)):'积分不变')+(extra.length?'；'+extra.join('；'):'')+(b.balance<0&&b.status==='欠费停机'?'；恢复后余额为负，按原状态欠费停机':'')}}
+function undoOrder(no,via){
+ var l=S.logs.filter(function(x){return x.no===no})[0];if(!l||!l.undo)throw new Error('该记录不支持撤单');if(l.undone)throw new Error('该记录已撤单，不能重复撤');
+ var cross=false;
+ if(!canUndo(l)){if(!hasCrossUndo())throw new Error(UNDO_BLOCK_MSG);var ck=crossCheck(l);if(!ck.ok)throw new Error(ck.reason);cross=true}
+ var u=l.undo,c=byId(S.customers,u.cid),pv=cross?crossCheck(l):undoPreview(l);
+ if(cross){crossCheck(l,true)}
+ else if(u.before){var b=JSON.parse(u.before);Object.keys(c).forEach(function(k){delete c[k]});Object.assign(c,b)}
+ else{c.status='销户';c.balance=0;c.points=0;c.addons=[];c.gifts=[];c.usage={data:0,voice:0,sms:0};}
+ u.txns.slice().reverse().forEach(function(t){if(t.amount)addTxn(c.id,'撤单冲正',-t.amount,'冲正 '+t.no+'（'+t.type+'：'+t.desc+'）')});
+ var bal=c.points;u.points.forEach(function(p){S.pointLogs.unshift({id:uid('PG'),t:nowStr(),month:S.month,cid:c.id,delta:-p.delta,reason:'撤单冲正：'+p.reason,bal:bal,rev:true})});
+ S.campUses=(S.campUses||[]).filter(function(x){return u.campUses.indexOf(x.id)<0});
+ Object.keys(u.campDelta).forEach(function(k){var cp=byId(S.campaigns,k);if(!cp)return;var d=u.campDelta[k];cp.uses=Math.max(0,(cp.uses||0)-d.uses);cp.total=r2((cp.total||0)-d.total);if(d.extraPts)cp.extraPts=(cp.extraPts||0)-d.extraPts});
+ Object.keys(u.mallDelta).forEach(function(k){var m=byId(S.mall,k);if(m)m.stock-=u.mallDelta[k]});
+ Object.keys(u.revDelta).forEach(function(k){S.monthRevenue[k]=r2((S.monthRevenue[k]||0)-u.revDelta[k])});
+ S.bills.forEach(function(bl){if(u.bills.indexOf(bl.no)>=0)bl.voided=true});
+ l.undone=true;l.undoneAt=nowStr();if(cross)l.crossUndo=true;S.logs.forEach(function(x){if(x.grp===l.no)x.undone=true});
+ addLog('撤单',c.id,(cross?'跨单撤单：':'')+'撤销 '+l.no+'（'+l.type+'）'+(via?'，来源：'+via:'')+'。'+pv.text);
+ save();return pv;
+}
+function dlgUndo(no,after){var l=S.logs.filter(function(x){return x.no===no})[0];if(!l)return;
+ var cross=false,pv;if(l.undone)return toast('该记录已撤单');
+ if(!canUndo(l)&&l.type==='开户'&&l.undo&&!l.undo.before)return dlgUndoOpen(no);
+ if(canUndo(l))pv=undoPreview(l);else{if(!hasCrossUndo())return toast(UNDO_BLOCK_MSG);var ck=crossCheck(l);if(!ck.ok)return toast(ck.reason);pv=ck;cross=true}
+ openModal(cross?'跨单撤单确认':'撤单确认','<div class="kv"><div>受理单号</div><div class="mono">'+esc(l.no)+'</div><div>业务类型</div><div>'+esc(l.type)+'</div><div>客户</div><div>'+esc(custName(l.cid))+'</div><div>办理时间</div><div>'+esc(l.t)+'</div><div>业务内容</div><div>'+esc(l.desc)+'</div></div><div class="note" style="margin-top:12px">'+(cross?'<b>跨单撤单（当前操作员 '+esc(opName())+' 有跨单撤单权限）：</b>只回退这一笔业务，之后的业务不受影响。<br>':'')+'<b>撤单后将：</b>'+esc(pv.text)+'。<br>资金流水和积分流水会写入“撤单冲正”反向记录，活动参与记录删除并减回活动统计。撤单后不可恢复。</div>',function(){undoOrder(no,after?'工单':'');if(after)after();toast('撤单成功')},'确认撤单')}
+function undoCell(l){if(l.undone)return '<span class="badge b-warn">已撤单</span>'+undoCellTag(l);if(!l.undo)return '<span class="muted">-</span>';
+ if(canUndo(l))return '<button class="btn s d" onclick="dlgUndo(\''+l.no+'\')">撤单</button>';
+ if(l.type==='开户'&&!l.undo.before){if(hasUndoOpen()){var ok2=undoOpenCheck(l);if(ok2.ok)return '<button class="btn s d" onclick="dlgUndoOpen(\''+l.no+'\')" title="连带撤销该客户之后的全部业务">撤销开户</button>';return '<span class="muted" style="font-size:12px" title="'+esc(ok2.reason)+'">不可撤</span>'}return '<span class="muted" style="font-size:12px" title="'+OPEN_BLOCK_MSG+'">需先撤后续</span>'}
+ if(hasCrossUndo()){var ck=crossCheck(l);if(ck.ok)return '<button class="btn s d" onclick="dlgUndo(\''+l.no+'\')" title="跨单撤单：只回退这一笔">跨单撤单</button>';return '<span class="muted" style="font-size:12px" title="'+esc(ck.reason)+'">不可撤</span>'}
+ return '<span class="muted" style="font-size:12px" title="'+UNDO_BLOCK_MSG+'">需先撤后续</span>'}
+function undoCellTag(l){return (l.crossUndo?' <span class="badge b-pri">跨单撤单</span>':'')+(l.openCascade!==undefined?' <span class="badge b-pri">撤销开户</span>':'')+(l.cascadeOf&&l.openCascade===undefined?' <span class="muted" style="font-size:11px">随开户撤销</span>':'')}
+// 撤单申请工单
+function undoableLogs(cid){return S.logs.filter(function(l){return l.cid===cid&&l.undo&&!l.undone}).slice(0,30)}
+function ticketUndoOpts(){var cid=fv('t_c');var box=$('t_undo_box');if(!box)return;if(fv('t_cat')!=='撤单申请'){box.style.display='none';return}box.style.display='';
+ var ls=undoableLogs(cid);$('t_undo').innerHTML=ls.length?ls.map(function(l){return '<option value="'+esc(l.no)+'">'+esc(l.t.slice(5,16)+' '+l.type+'：'+l.desc.slice(0,40))+(canUndoAny(l)?'':'（需先撤后续）')+'</option>'}).join(''):'<option value="">该客户暂无可撤销的受理记录</option>'}
+function approveUndo(tid){var t=byId(S.tickets,tid);if(!t||!t.undoLog)return;
+ dlgUndo(t.undoLog,function(){t.flow.push({t:nowStr(),op:opName(),dept:opDept(),text:'同意撤单，已回退受理记录 '+t.undoLog});
+  if(t.agentId)closeTicket(tid,0,'同意撤单，业务已回退');else{t.status='已关闭';t.flow.push({t:nowStr(),op:opName(),dept:opDept(),text:'关闭工单（撤单完成）'});addLog('工单',t.cid,'撤单申请 '+t.no+' 已同意并结单');save()}})}
+
+/* ========== 操作员与部门 ========== */
+var OPKEY='bss_sim_cur_operator';
+var OP_ROLES=['营业员','客服','班长','管理员','计费专员','市场专员'];
+function opDefaults(o){o=o||S;if(!o)return;
+ if(!Array.isArray(o.depts))o.depts=[{id:'D1',name:'营业厅',desc:'前台业务受理'},{id:'D2',name:'客服中心',desc:'工单与客户服务'},{id:'D3',name:'市场部',desc:'套餐与营销活动'},{id:'D4',name:'计费中心',desc:'出账与账务'},{id:'D5',name:'系统管理部',desc:'系统与权限管理'}];
+ if(!Array.isArray(o.operators))o.operators=[];
+ if(!o.operators.length)o.operators.push({id:'O1',no:'OP0001',name:'系统管理员',deptId:(o.depts.filter(function(d){return d.name==='系统管理部'})[0]||o.depts[0]||{}).id||'',role:'管理员',phone:'',status:'启用',created:nowStr()});
+ if(!o.opSeq)o.opSeq=o.operators.length;
+ o.operators.forEach(function(x){if(x.crossUndo===undefined)x.crossUndo=(x.no==='OP0001');if(x.undoOpen===undefined)x.undoOpen=(x.no==='OP0001')});
+}
+/* ========== 客户级别 ========== */
+function levelDefaults(o){o=o||S;if(!o)return;
+ if(!Array.isArray(o.levels)||!o.levels.length)o.levels=[
+  {id:'LV1',name:'普通客户',rank:1,desc:'新入网默认级别',benefits:'基础服务',up:{spend:'',points:'',tenure:'',logic:'AND'},down:{spend:'',points:'',logic:'OR'}},
+  {id:'LV2',name:'全球通银卡',rank:2,desc:'',benefits:'专属客服通道',up:{spend:100,points:'',tenure:6,logic:'AND'},down:{spend:50,points:'',logic:'OR'}},
+  {id:'LV3',name:'全球通金卡',rank:3,desc:'',benefits:'专属客户经理、积分加速（模拟）',up:{spend:300,points:'',tenure:12,logic:'AND'},down:{spend:150,points:'',logic:'OR'}}];
+ var lv=o.levels.slice().sort(function(a,b){return num(a.rank)-num(b.rank)}),def=lv[0];
+ (o.customers||[]).forEach(function(c){if(!c.levelId||!o.levels.some(function(l){return l.id===c.levelId}))c.levelId=def.id;if(!Array.isArray(c.levelHist))c.levelHist=[]})}
+function levelsSorted(){return (S.levels||[]).slice().sort(function(a,b){return num(a.rank)-num(b.rank)})}
+function defaultLevel(){return levelsSorted()[0]||null}
+function levelOf(c){return (c&&byId(S.levels||[],c.levelId))||defaultLevel()}
+function levelName(c){var l=levelOf(c);return l?l.name:'-'}
+function levelBadge(c){var l=levelOf(c);if(!l)return '-';var i=levelsSorted().indexOf(l);return '<span class="badge'+(i>0?' b-pri':'')+'">'+esc(l.name)+'</span>'}
+function prevMonth(m){var y=+m.slice(0,4),mo=+m.slice(5,7)-1;if(mo<1){mo=12;y--}return y+'-'+pad(mo)}
+function monthDiff(a,b){if(!a||!b)return 0;return (+b.slice(0,4)-+a.slice(0,4))*12+(+b.slice(5,7)-+a.slice(5,7))}
+// 指标：月消费=该账期“扣费”流水合计；积分=当前积分；在网月数=开户月份到当前账期的月数
+function custMetrics(c,m){var sp=0;S.txns.forEach(function(t){if(t.cid===c.id&&t.month===m&&t.type==='扣费')sp-=num(t.amount)});
+ S.txns.forEach(function(t){if(t.cid===c.id&&t.month===m&&t.type==='撤单冲正'&&/扣费/.test(t.desc||''))sp-=num(t.amount)});
+ return {spend:r2(Math.max(0,sp)),points:num(c.points),tenure:Math.max(0,monthDiff((c.openDate||'').slice(0,7),S.month))}}
+function condParts(cond,kind){var r=[];if(!cond)return r;var lt=kind==='down';
+ if(cond.spend!==''&&cond.spend!=null)r.push({k:'spend',v:num(cond.spend),t:'月消费'+(lt?'＜':'≥')+num(cond.spend)+'元'});
+ if(cond.points!==''&&cond.points!=null)r.push({k:'points',v:num(cond.points),t:'积分'+(lt?'＜':'≥')+num(cond.points)});
+ if(!lt&&cond.tenure!==''&&cond.tenure!=null)r.push({k:'tenure',v:num(cond.tenure),t:'在网≥'+num(cond.tenure)+'个月'});return r}
+function condText(cond,kind){var ps=condParts(cond,kind);if(!ps.length)return kind==='down'?'不自动降级':'不自动升级（仅手动）';return ps.map(function(x){return x.t}).join(cond.logic==='OR'?' 或 ':' 且 ')}
+function condMet(cond,mt,kind){var ps=condParts(cond,kind);if(!ps.length)return false;var res=ps.map(function(x){return kind==='down'?mt[x.k]<x.v:mt[x.k]>=x.v});return cond.logic==='OR'?res.some(Boolean):res.every(Boolean)}
+function setLevel_raw(c,lvId,how,reason){var from=levelOf(c),to=byId(S.levels,lvId);if(!to)throw new Error('请选择级别');if(from&&from.id===to.id)throw new Error('与当前级别相同');
+ var dir=from&&num(to.rank)>num(from.rank)?'升级':'降级';var oi=opInfo();
+ c.levelId=to.id;if(!Array.isArray(c.levelHist))c.levelHist=[];c.levelHist.unshift({t:nowStr(),from:from?from.name:'-',to:to.name,dir:dir,how:how,reason:reason||'',op:oi.op,month:S.month});
+ addLog('级别变更',c.id,how+dir+'：'+(from?from.name:'-')+' → '+to.name+(reason?'（'+reason+'）':''));return dir}
+function changeLevel(cid,lvId,reason){return withUndo('调整级别',cid,function(){var c=byId(S.customers,cid);if(!c)throw new Error('请选择客户');assertNotStopped(c);if(c.status==='销户')throw new Error('已销户客户不可调整级别');var d=setLevel_raw(c,lvId,'手动',reason);save();return d})}
+// 评估：先看当前级别的降级条件，满足则降一级；否则升到满足升级条件的最高级别
+function evalLevel(c,m){var ls=levelsSorted(),cur=levelOf(c),i=ls.indexOf(cur),mt=custMetrics(c,m);
+ if(i>0&&condMet(cur.down,mt,'down'))return {to:ls[i-1],why:'降级条件：'+condText(cur.down,'down')+'；本期月消费 '+mt.spend+' 元、积分 '+mt.points};
+ for(var j=ls.length-1;j>i;j--){if(condMet(ls[j].up,mt,'up'))return {to:ls[j],why:'升级条件：'+condText(ls[j].up,'up')+'；本期月消费 '+mt.spend+' 元、积分 '+mt.points+'、在网 '+mt.tenure+' 个月'}}
+ return null}
+function runLevelEval(m,via){var r={up:0,down:0,names:[]};
+ S.customers.forEach(function(c){if(c.status==='销户')return;var e=evalLevel(c,m);if(!e)return;var d=setLevel_raw(c,e.to.id,via,m+' 账期 · '+e.why);if(d==='升级')r.up++;else r.down++;r.names.push(c.name+'→'+e.to.name)});
+ return r}
+function levelSummary(r){return '级别评估：升级 '+r.up+' 户，降级 '+r.down+' 户'}
+function doLevelEval(){var m=prevMonth(S.month);confirmDo('按上一账期 '+m+' 的消费、当前积分和在网时长评估所有客户级别？',function(){var r=runLevelEval(m,'手动评估');save();render();toast(levelSummary(r)+(r.names.length?'（'+r.names.slice(0,5).join('、')+(r.names.length>5?' 等':'')+'）':''))})}
+PAGES.level=function(){var ls=levelsSorted();
+ var h='<div class="card"><div class="toolbar"><button class="btn p" onclick="dlgLevel()">＋ 新增级别</button><button class="btn" onclick="doLevelEval()">执行级别评估</button><span class="muted">等级数字越大级别越高。月末出账时自动评估：满足本级“降级条件”降一级，否则升到满足“升级条件”的最高级别</span></div>'+
+ '<div class="tbl-wrap"><table><tr><th class="right">等级</th><th>级别名称</th><th>升级条件（满足即升到本级）</th><th>降级条件（满足即降一级）</th><th>权益</th><th>说明</th><th class="right">客户数</th><th>操作</th></tr>'+(ls.map(function(l,i){var n=S.customers.filter(function(c){return c.status!=='销户'&&levelOf(c)===l}).length;
+  return '<tr><td class="right">'+esc(String(l.rank))+'</td><td><b>'+esc(l.name)+'</b>'+(i===0?' <span class="badge">默认</span>':'')+'</td><td style="white-space:normal;min-width:150px">'+(i===0?'<span class="muted">-</span>':esc(condText(l.up,'up')))+'</td><td style="white-space:normal;min-width:130px">'+(i===0?'<span class="muted">-</span>':esc(condText(l.down,'down')))+'</td><td style="white-space:normal">'+esc(l.benefits||'')+'</td><td style="white-space:normal">'+esc(l.desc||'')+'</td><td class="right">'+n+'</td><td><button class="btn s" onclick="dlgLevel(\''+l.id+'\')">编辑</button><button class="btn s d" onclick="delLevel(\''+l.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=8 class="muted">暂无级别</td></tr>')+'</table></div>'+
+ '<div class="note" style="margin-top:10px">月消费 = 该账期的扣费合计（月租、可选包、超额等）；积分 = 客户当前积分；在网时长 = 开户月份到当前账期的月数。最低等级的级别是默认级别，新开户客户默认为该级别。手动“执行级别评估”按上一账期的消费计算。</div></div>';
+ var hist=[];S.customers.forEach(function(c){(c.levelHist||[]).forEach(function(x){hist.push({c:c,x:x})})});hist.sort(function(a,b){return a.x.t<b.x.t?1:-1});
+ h+='<div class="card"><h3>最近级别变更（'+hist.length+'）</h3><div class="tbl-wrap"><table><tr><th>时间</th><th>客户</th><th>变更</th><th>方式</th><th>原因</th><th>操作员</th></tr>'+(hist.slice(0,50).map(function(e){return '<tr><td>'+esc(e.x.t)+'</td><td><a onclick="dlgCust(\''+e.c.id+'\')">'+esc(e.c.name+' '+e.c.phone)+'</a></td><td><span class="badge '+(e.x.dir==='升级'?'b-ok':'b-warn')+'">'+esc(e.x.dir)+'</span> '+esc(e.x.from)+' → '+esc(e.x.to)+'</td><td>'+esc(e.x.how)+'</td><td style="white-space:normal;min-width:200px">'+esc(e.x.reason||'')+'</td><td>'+esc(e.x.op||'-')+'</td></tr>'}).join('')||'<tr><td colspan=6 class="muted">暂无级别变更</td></tr>')+'</table></div></div>';
+ return h};
+function lvNum(id){var v=fv(id);return v===''?'':num(v)}
+function dlgLevel(id){var l=id?byId(S.levels,id):{name:'',rank:(levelsSorted().length?num(levelsSorted().slice(-1)[0].rank)+1:1),desc:'',benefits:'',up:{spend:'',points:'',tenure:'',logic:'AND'},down:{spend:'',points:'',logic:'OR'}};
+ function inp(i,v,ph){return '<input id="'+i+'" type="number" min="0" value="'+esc(v==null?'':String(v))+'" placeholder="'+(ph||'不设置')+'">'}
+ function lg(i,v){return '<select id="'+i+'"><option value="AND"'+(v!=='OR'?' selected':'')+'>全部满足（且）</option><option value="OR"'+(v==='OR'?' selected':'')+'>满足任一（或）</option></select>'}
+ openModal(id?'编辑客户级别':'新增客户级别','<div class="form"><div class="f"><label>级别名称 *</label><input id="lv_n" value="'+esc(l.name)+'" placeholder="如：全球通白金卡"></div><div class="f"><label>等级（数字越大级别越高）*</label><input id="lv_r" type="number" value="'+esc(String(l.rank))+'"></div>'+
+  '<div class="f full"><label>权益（选填）</label><input id="lv_b" value="'+esc(l.benefits||'')+'"></div><div class="f full"><label>说明（选填）</label><input id="lv_d" value="'+esc(l.desc||'')+'"></div>'+
+  '<div class="f full note">升级条件：满足后升到本级（每项可不填，全部不填则只能手动调整到本级；最低级别不需要升级条件）</div>'+
+  '<div class="f"><label>月消费 ≥（元）</label>'+inp('lv_us',l.up.spend)+'</div><div class="f"><label>积分 ≥</label>'+inp('lv_up',l.up.points)+'</div><div class="f"><label>在网时长 ≥（月）</label>'+inp('lv_ut',l.up.tenure)+'</div><div class="f"><label>条件关系</label>'+lg('lv_ul',l.up.logic)+'</div>'+
+  '<div class="f full note">降级条件：处于本级的客户满足后降一级（每项可不填，全部不填则不自动降级）</div>'+
+  '<div class="f"><label>月消费 ＜（元）</label>'+inp('lv_ds',l.down.spend)+'</div><div class="f"><label>积分 ＜</label>'+inp('lv_dp',l.down.points)+'</div><div class="f"><label>条件关系</label>'+lg('lv_dl',l.down.logic)+'</div></div>',function(){
+  var o={name:fv('lv_n'),rank:num(fv('lv_r'),NaN),benefits:fv('lv_b'),desc:fv('lv_d'),up:{spend:lvNum('lv_us'),points:lvNum('lv_up'),tenure:lvNum('lv_ut'),logic:fv('lv_ul')},down:{spend:lvNum('lv_ds'),points:lvNum('lv_dp'),logic:fv('lv_dl')}};
+  if(!o.name)throw new Error('请填写级别名称');if(isNaN(o.rank)||fv('lv_r')==='')throw new Error('请填写等级数字');
+  if(S.levels.some(function(x){return x.id!==id&&x.name===o.name}))throw new Error('级别名称已存在');if(S.levels.some(function(x){return x.id!==id&&num(x.rank)===o.rank}))throw new Error('等级数字已被其他级别使用');
+  if(id){Object.assign(l,o);addLog('配置','','修改客户级别 '+o.name)}else{o.id=uid('LV');S.levels.push(o);addLog('配置','','新增客户级别 '+o.name)}save();toast('级别已保存')})}
+function delLevel(id){var l=byId(S.levels,id);if(!l)return;if(S.levels.length<=1)return toast('至少保留一个级别');
+ var rest=levelsSorted().filter(function(x){return x.id!==id}),def=rest[0];var cs=S.customers.filter(function(c){return levelOf(c)===l});
+ if(!cf('确认删除级别「'+l.name+'」？'+(cs.length?'该级别下的 '+cs.length+' 位客户将调整为「'+def.name+'」。':''),function(){delLevel(id)}))return;
+ S.levels=S.levels.filter(function(x){return x.id!==id});(S.campaigns||[]).forEach(function(cp){if(cp.levels)cp.levels=cp.levels.filter(function(x){return x!==id})});
+ cs.forEach(function(c){if(!Array.isArray(c.levelHist))c.levelHist=[];var oi=opInfo();c.levelId=def.id;c.levelHist.unshift({t:nowStr(),from:l.name,to:def.name,dir:num(def.rank)>num(l.rank)?'升级':'降级',how:'级别删除',reason:'级别「'+l.name+'」被删除',op:oi.op,month:S.month})});
+ addLog('配置','','删除客户级别 '+l.name+(cs.length?'，'+cs.length+' 位客户调整为 '+def.name:''));save();render();toast('已删除')}
+function dlgCredit(cid){var c=byId(S.customers,cid);if(!c)return;
+ openModal('设置信用额度 · '+c.name,'<div class="form"><div class="f"><label>信用额度（元，0=不设）</label><input id="cr_v" type="number" min="0" value="'+(num(c.credit)||0)+'"></div><div class="f"><label>有效期至（留空=长期有效）</label><input id="cr_x" type="date" value="'+esc(c.creditExp||'')+'"></div><div class="f full note">当前余额 '+money(c.balance)+'，状态 '+esc(c.status)+'。欠费在信用额度内时客户保持在网，可正常办理业务；超出额度或额度过期后欠费，转为欠费停机。欠费停机客户调高额度后欠费回到额度内，会自动复机。</div></div>',function(){var r=setCredit(cid,fv('cr_v'),fv('cr_x'));toast('信用额度已设置，可用额度 '+money(availBal(r)))},'确认')}
+function dlgChangeLevel(cid){var c=byId(S.customers,cid);if(!c)return;if(isStopped(c))return toast(STOP_MSG);var cur=levelOf(c);
+ openModal('调整级别 · '+c.name,'<div class="form"><div class="f full"><label>当前级别</label><div>'+levelBadge(c)+'</div></div><div class="f"><label>调整为</label><select id="cl_l">'+levelsSorted().filter(function(l){return l!==cur}).map(function(l){return '<option value="'+esc(l.id)+'">'+esc(l.name)+'（等级 '+esc(String(l.rank))+'）</option>'}).join('')+'</select></div><div class="f"><label>原因（选填）</label><input id="cl_r" placeholder="如：客户申请/营销赠送"></div></div>',function(){var d=changeLevel(cid,fv('cl_l'),fv('cl_r'));toast('已'+d+'为 '+levelName(c))},'确认调整')}
+function curOp(){if(!S||!Array.isArray(S.operators))return null;var id='';try{id=sGet(OPKEY)||''}catch(e){}
+ var o=byId(S.operators,id);if(o&&o.status==='启用')return o;o=S.operators.filter(function(x){return x.status==='启用'})[0]||null;if(o){try{sSet(OPKEY,o.id)}catch(e){}}return o}
+function deptName(id){var d=S&&S.depts?byId(S.depts,id):null;return d?d.name:'-'}
+function opName(){var o=curOp();return o?o.name:'-'}
+function opDept(){var o=curOp();return o?deptName(o.deptId):'-'}
+function opInfo(){var o=curOp();return o?{op:o.name,opNo:o.no,opId:o.id,dept:deptName(o.deptId)}:{op:'-',dept:'-'}}
+function setCurOp(id){var o=byId(S.operators,id);if(!o||o.status!=='启用')return toast('该操作员不可用');try{sSet(OPKEY,id)}catch(e){}toast('当前操作员：'+o.name+'（'+deptName(o.deptId)+'）');render()}
+function renderOpSel(){var el=$('opSel');if(!el||!S)return;var cur=curOp();
+ el.innerHTML='<span class="muted op-l">当前操作员</span><select onchange="setCurOp(this.value)" style="max-width:200px;padding:4px 6px">'+S.operators.filter(function(o){return o.status==='启用'}).map(function(o){return '<option value="'+esc(o.id)+'"'+(cur&&cur.id===o.id?' selected':'')+'>'+esc(o.name+'（'+deptName(o.deptId)+'）')+'</option>'}).join('')+'</select>'}
+function enabledOps(){return S.operators.filter(function(o){return o.status==='启用'})}
+PAGES.operator=function(){var cur=curOp();
+ var h='<div class="card"><h3>部门管理<span class="sp"></span><button class="btn p" onclick="dlgDept()">＋ 新增部门</button></h3><div class="tbl-wrap"><table><tr><th>部门编号</th><th>部门名称</th><th>说明</th><th class="right">操作员数</th><th>操作</th></tr>'+(S.depts.map(function(d){var n=S.operators.filter(function(o){return o.deptId===d.id}).length;
+  return '<tr><td class="mono">'+esc(d.id)+'</td><td><b>'+esc(d.name)+'</b></td><td>'+esc(d.desc||'')+'</td><td class="right">'+n+'</td><td><button class="btn s" onclick="dlgDept(\''+d.id+'\')">编辑</button><button class="btn s d" onclick="delDept(\''+d.id+'\')">删除</button></td></tr>'}).join('')||'<tr><td colspan=5 class="muted">暂无部门</td></tr>')+'</table></div></div>';
+ h+='<div class="card"><h3>操作员管理<span class="sp"></span><button class="btn p" onclick="dlgOperator()">＋ 新增操作员</button></h3><div class="note" style="margin-bottom:10px">当前操作员：<b>'+esc(cur?cur.name+'（'+cur.no+'，'+deptName(cur.deptId)+'）':'-')+'</b>。新的受理记录、撤单和工单流转都会记下办理的操作员和部门。至少要保留一个启用的操作员；系统不保存密码。</div><div class="tbl-wrap"><table><tr><th>工号</th><th>姓名</th><th>部门</th><th>岗位/角色</th><th>手机号</th><th>权限</th><th>状态</th><th>创建时间</th><th>操作</th></tr>'+S.operators.map(function(o){
+  return '<tr><td class="mono">'+esc(o.no)+'</td><td><b>'+esc(o.name)+'</b>'+(cur&&cur.id===o.id?' <span class="badge b-pri">当前</span>':'')+'</td><td>'+esc(deptName(o.deptId))+'</td><td>'+esc(o.role)+'</td><td class="mono">'+esc(o.phone||'')+'</td><td>'+((o.crossUndo?'<span class="badge b-pri">跨单撤单</span> ':'')+(o.undoOpen?'<span class="badge b-pri">撤销开户</span>':'')||'<span class="muted">-</span>')+'</td><td>'+(o.status==='启用'?'<span class="badge b-ok">启用</span>':'<span class="badge">停用</span>')+'</td><td>'+esc(o.created||'-')+'</td><td>'+(o.status==='启用'&&!(cur&&cur.id===o.id)?'<button class="btn s" onclick="setCurOp(\''+o.id+'\')">切换为当前</button>':'')+'<button class="btn s" onclick="dlgOperator(\''+o.id+'\')">编辑</button><button class="btn s" onclick="toggleOperator(\''+o.id+'\')">'+(o.status==='启用'?'停用':'启用')+'</button><button class="btn s d" onclick="delOperator(\''+o.id+'\')">删除</button></td></tr>'}).join('')+'</table></div></div>';
+ return h};
+function dlgDept(id){var d=id?byId(S.depts,id):{name:'',desc:''};
+ openModal(id?'编辑部门':'新增部门','<div class="form"><div class="f"><label>部门名称 *</label><input id="dp_n" value="'+esc(d.name)+'"></div><div class="f"><label>说明（选填）</label><input id="dp_d" value="'+esc(d.desc||'')+'"></div></div>',function(){var n=fv('dp_n');if(!n)throw new Error('请填写部门名称');
+  if(S.depts.some(function(x){return x.name===n&&x.id!==id}))throw new Error('部门名称已存在');
+  if(id){d.name=n;d.desc=fv('dp_d');addLog('配置','','修改部门 '+n)}else{S.depts.push({id:uid('D'),name:n,desc:fv('dp_d')});addLog('配置','','新增部门 '+n)}save();renderOpSel();toast('已保存')})}
+function delDept(id){var d=byId(S.depts,id);if(!d)return;var n=S.operators.filter(function(o){return o.deptId===id}).length;
+ if(n){toast('部门「'+d.name+'」下还有 '+n+' 名操作员，不能删除，请先调整或删除这些操作员');return false}
+ if(!cf('确认删除部门「'+d.name+'」？',function(){delDept(id)}))return false;S.depts=S.depts.filter(function(x){return x.id!==id});addLog('配置','','删除部门 '+d.name);save();render();toast('已删除');return true}
+function nextOpNo(){var n=(S.opSeq||0)+1,no;do{no='OP'+String(n).padStart(4,'0');n++}while(S.operators.some(function(o){return o.no===no}));return no}
+function dlgOperator(id){var o=id?byId(S.operators,id):{no:nextOpNo(),name:'',deptId:(S.depts[0]||{}).id||'',role:'营业员',phone:'',status:'启用'};
+ if(!S.depts.length)return toast('请先新增部门');
+ openModal(id?'编辑操作员':'新增操作员','<div class="form"><div class="f"><label>工号 *（自动生成，可修改）</label><input id="op_no" value="'+esc(o.no)+'"></div><div class="f"><label>姓名 *</label><input id="op_n" value="'+esc(o.name)+'"></div><div class="f"><label>部门 *</label><select id="op_d">'+opts(S.depts,o.deptId)+'</select></div><div class="f"><label>岗位/角色</label><select id="op_r">'+sopts(OP_ROLES.indexOf(o.role)>=0?OP_ROLES:OP_ROLES.concat([o.role]),o.role)+'</select></div><div class="f"><label>手机号（选填）</label><input id="op_p" value="'+esc(o.phone||'')+'"></div><div class="f"><label>状态</label><select id="op_s">'+sopts(['启用','停用'],o.status)+'</select></div><div class="f full"><label style="display:flex;gap:6px;align-items:center;font-size:13px;color:inherit;cursor:pointer"><input type="checkbox" id="op_cu" style="width:auto;margin:0"'+(o.crossUndo?' checked':'')+'> 跨单撤单权限（可不按时间倒序，直接撤销客户较早的业务）</label></div><div class="f full"><label style="display:flex;gap:6px;align-items:center;font-size:13px;color:inherit;cursor:pointer"><input type="checkbox" id="op_uo" style="width:auto;margin:0"'+(o.undoOpen?' checked':'')+'> 撤销开户权限（客户开户后办过其它业务，也可直接撤销开户，连带撤销其后全部业务）</label></div></div>',function(){
+  var v={no:fv('op_no'),name:fv('op_n'),deptId:fv('op_d'),role:fv('op_r'),phone:fv('op_p'),status:fv('op_s'),crossUndo:!!($('op_cu')&&$('op_cu').checked),undoOpen:!!($('op_uo')&&$('op_uo').checked)};
+  if(!v.no)throw new Error('请填写工号');if(!v.name)throw new Error('请填写姓名');if(!byId(S.depts,v.deptId))throw new Error('请选择部门');
+  if(S.operators.some(function(x){return x.no===v.no&&x.id!==id}))throw new Error('工号已存在');
+  if(id&&o.status==='启用'&&v.status==='停用'&&enabledOps().length<=1)throw new Error('至少要保留一个启用的操作员');
+  if(id){Object.assign(o,v);addLog('配置','','修改操作员 '+v.no+' '+v.name)}else{v.id=uid('O');v.created=nowStr();S.opSeq=(S.opSeq||0)+1;S.operators.push(v);addLog('配置','','新增操作员 '+v.no+' '+v.name+'（'+deptName(v.deptId)+'）')}
+  save();renderOpSel();toast('已保存')})}
+function toggleOperator(id){var o=byId(S.operators,id);if(!o)return;if(o.status==='启用'&&enabledOps().length<=1){toast('至少要保留一个启用的操作员');return}
+ o.status=o.status==='启用'?'停用':'启用';addLog('配置','',o.status+'操作员 '+o.no+' '+o.name);save();render()}
+function delOperator(id){var o=byId(S.operators,id);if(!o)return false;if(o.status==='启用'&&enabledOps().length<=1){toast('至少要保留一个启用的操作员，不能删除');return false}
+ if(!cf('确认删除操作员「'+o.name+'」？历史受理记录中的姓名会保留。',function(){delOperator(id)}))return false;S.operators=S.operators.filter(function(x){return x.id!==id});addLog('配置','','删除操作员 '+o.no+' '+o.name);save();render();return true}
+
+/* ========== 启动 ========== */
+if(!load()){seed();ensureFields(S);save()}else{ensureFields(S);save();checkCredit('信用额度到期检查');applyPendingPlans('到期自动生效',today())}
+var _ir0=processInstalls('打开系统自动执行');
+render();if(_ir0.n)toast('已自动返还到期活动款 '+_ir0.n+' 期，共 '+money(_ir0.sum));
+</script>
+</body>
+</html>
