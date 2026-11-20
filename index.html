@@ -287,7 +287,7 @@ function recCampUse(cust,c,scene,amount,desc){if(!cust||!cust.id)return;if(!Arra
 // 兼容旧数据/导入数据：补字段，并从资金流水回填活动参与记录
 function renameAddonDeep(o){if(!o||typeof o!=='object')return;for(var k in o){if(!Object.prototype.hasOwnProperty.call(o,k))continue;var v=o[k];if(typeof v==='string'){if(v.indexOf('增值')>=0)o[k]=v.replace(/增值可选包|增值包/g,'可选包')}else if(v&&typeof v==='object')renameAddonDeep(v)}}
 function renameBanliDeep(o){if(!o||typeof o!=='object')return;for(var k in o){if(!Object.prototype.hasOwnProperty.call(o,k))continue;var v=o[k];if(typeof v==='string'){if(v.indexOf('直接办理')>=0)o[k]=v.replace(/直接办理/g,'办理')}else if(v&&typeof v==='object')renameBanliDeep(v)}}
-function ensureFields(o){o=o||S;if(!o)return;bbDefaults(o);waiveDefaults(o);addonValidityDefaults(o);addonPlansDefaults(o);(o.campaigns||[]).forEach(function(cp){if(!Array.isArray(cp.levels))cp.levels=[]});if(!o.addonRenamed1){renameAddonDeep(o);o.addonRenamed1=true}if(!o.banliRenamed1){renameBanliDeep(o);o.banliRenamed1=true}if(!o.dinggouScene1){(o.campUses||[]).forEach(function(u){if(u.scene==='办理')u.scene='订购'});o.dinggouScene1=true}opDefaults(o);levelDefaults(o);(o.customers||[]).forEach(function(c){if(c.idno==='110***********0000（示例）'||c.idno==='（未填）')c.idno=''});delete o.trails;if(Array.isArray(o.logs))o.logs=o.logs.filter(function(l){return l.type!=='轨迹'});
+function ensureFields(o){o=o||S;if(!o)return;bbDefaults(o);waiveDefaults(o);addonValidityDefaults(o);addonPlansDefaults(o);if(!o.addonPtsName1){(o.pointLogs||[]).forEach(function(l){if(l.reason&&l.reason.indexOf('订购消费积分')===0)l.reason='订购可选包消费积分'+l.reason.slice(6)});o.addonPtsName1=true}(o.campaigns||[]).forEach(function(cp){if(!Array.isArray(cp.levels))cp.levels=[]});if(!o.addonRenamed1){renameAddonDeep(o);o.addonRenamed1=true}if(!o.banliRenamed1){renameBanliDeep(o);o.banliRenamed1=true}if(!o.dinggouScene1){(o.campUses||[]).forEach(function(u){if(u.scene==='办理')u.scene='订购'});o.dinggouScene1=true}opDefaults(o);levelDefaults(o);(o.customers||[]).forEach(function(c){if(c.idno==='110***********0000（示例）'||c.idno==='（未填）')c.idno=''});delete o.trails;if(Array.isArray(o.logs))o.logs=o.logs.filter(function(l){return l.type!=='轨迹'});
  if(!Array.isArray(o.campUses)){o.campUses=[];(o.txns||[]).forEach(function(t){if(t.type!=='活动优惠'||!t.cid)return;var parts=String(t.desc||'').split(' · ');var name=parts[0],scene=parts[1]||'-';
   var c=(o.campaigns||[]).filter(function(x){return x.name===name})[0];
   o.campUses.push({id:'CUB'+o.campUses.length,cid:t.cid,campId:c?c.id:'',campName:name,type:c?c.type:'',t:t.t,month:t.month,scene:scene,desc:(c&&c.type==='积分翻倍'?'积分翻倍':'优惠 '+money(t.amount))+'（由历史流水回填）',amount:r2(t.amount)})})}}
@@ -452,7 +452,7 @@ function orderAddon_raw(cid,aid,extra){
  addTxn(c.id,'扣费',-fee,'订购 '+a.name+(r.discount?'（优惠 '+money(r.discount)+'）':''));addRevenue(fee);
  S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:[{name:'可选包：'+a.name,amt:a.price}].concat(r.discount?[{name:'活动优惠',amt:-r.discount}]:[]),total:fee,note:'订购'});
  addLog('订购',c.id,'订购'+(cat!=='通用'?cat:'')+'可选包 '+a.name+'（'+a.cycle+'，有效期 '+addonValidText(a)+(ex.end?' 至 '+ex.end:'')+(addonExtraText(ex)?'，'+addonExtraText(ex):'')+'），实扣 '+money(fee)+(r.applied.length?'；命中：'+r.applied.join('；'):''));
- if(fee>0)earn(c,fee,'订购消费积分');
+ if(fee>0)earn(c,fee,'订购可选包消费积分');
  var wv=addonWaives(a);if(wv.length)creditWaives(c,wv.map(function(w){return Object.assign({},w,{aid:a.id,src:'可选包',srcName:a.name})}),'订购 '+a.name);
  if(overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'订购后欠费超出信用额度，欠费停机')}
  save();return fee;
