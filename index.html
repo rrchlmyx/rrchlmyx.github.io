@@ -108,7 +108,8 @@ function r2(n){return Math.round((+n||0)*100)/100}
 function nextMonth(m){var y=+m.slice(0,4),mo=+m.slice(5,7)+1;if(mo>12){mo=1;y++}return y+'-'+pad(mo)}
 function uid(p){S.seq=(S.seq||1000)+1;return p+S.seq}
 function bizNo(prefix){S.noSeq=(S.noSeq||0)+1;var d=new Date();return prefix+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+String(S.noSeq).padStart(5,'0')}
-function toast(t){var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(function(){e.style.display='none'},2400)}
+var _pendingWaive=0;function flushWaiveToast(){if(_pendingWaive>0){var v=_pendingWaive;_pendingWaive=0;toast('已减免话费 '+money(v))}}
+function toast(t){if(_pendingWaive>0&&t&&String(t).indexOf('已减免话费')<0){t=t+'，已减免话费 '+money(_pendingWaive);_pendingWaive=0}var e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(function(){e.style.display='none'},2400)}
 // 存储层：localStorage 不可用（如 App 内预览/沙箱）时退回内存，本次打开期间照常使用
 var MEMSTORE={},STORE_OK=null,STORE_NOTICED=false;
 function storeOk(){if(STORE_OK!==null)return STORE_OK;try{var ls=window.localStorage,k='__bss_t';ls.setItem(k,'1');ls.removeItem(k);STORE_OK=true}catch(e){STORE_OK=false}return STORE_OK}
@@ -339,6 +340,19 @@ function waiveValidText(p){var n=num(p.validMonths);return n>0?n+' 个月':'长�
 function waiveActive(w,m){return m>=w.start&&(!w.end||m<=w.end)}
 function waiveEndText(w){return w.end?monthEndDate(w.end):'长期有效'}
 function addonWaives(a){var out=[];if(a&&addonCat(a)==='话费减免'&&num(a.waiveAmt)>0){var n0=num(a.validMonths);out.push({pid:'',name:a.name,amt:r2(num(a.waiveAmt)),end:n0>0?addMonthsM(S.month,n0-1):''})}(a&&a.items||[]).forEach(function(it){var p=byId(S.products,it.pid);if(p&&p.type==='话费减免'&&num(p.waiveAmt)>0){var n=num(p.validMonths);out.push({pid:p.id,name:p.name,amt:r2(num(p.waiveAmt)*num(it.qty,1)),end:n>0?addMonthsM(S.month,n-1):''})}});return out}
+function creditWaives(c,list,label){if(!list||!list.length)return 0;var wt=0;c.waives=c.waives||[];list.forEach(function(w){c.waives.push({id:uid('W'),aid:w.aid||'',planId:w.planId||'',src:w.src||'可选包',srcName:w.srcName||'',pid:w.pid||'',name:w.name,amt:w.amt,start:S.month,end:w.end||'',last:S.month,t:nowStr()});wt=r2(wt+w.amt)});
+ c.balance=r2(c.balance+wt);addTxn(c.id,'话费减免',wt,'话费减免（'+label+'）');S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:list.map(function(w){return {name:'话费减免：'+w.name,amt:-w.amt}}),total:-wt,note:'话费减免'});
+ addLog('话费减免',c.id,label+' 立即减免话费 '+money(wt)+'，余额 '+money(c.balance)+'（'+list.map(function(w){return w.name+' 每月 '+money(w.amt)+'，'+(w.end?'有效至 '+monthEndDate(w.end):'长期有效')}).join('；')+'）');
+ if(c.status==='欠费停机'&&!overCredit(c)){c.status='在网';addLog('复机',c.id,'话费减免后欠费回到信用额度内，自动复机')}
+ _pendingWaive=r2(_pendingWaive+wt);setTimeout(flushWaiveToast,0);return wt}
+function prodWaive(p,qty,src,srcName,extra){if(!p||p.type!=='话费减免'||!(num(p.waiveAmt)>0))return null;var n=num(p.validMonths);return Object.assign({pid:p.id,name:p.name,amt:r2(num(p.waiveAmt)*num(qty,1)),end:n>0?addMonthsM(S.month,n-1):'',src:src,srcName:srcName},extra||{})}
+// 业务办理后统一检查：赠品里的话费减免商品、当前套餐里的话费减免商品
+function syncWaives(c,label){if(!c||c.status==='销户')return 0;var got=0;
+ var gl=[];(c.gifts||[]).forEach(function(g){if(g.waived)return;var p=byId(S.products,g.pid);var w=prodWaive(p,g.qty,'赠品',g.from||'赠送');if(w){g.waived=true;gl.push(w)}});
+ if(gl.length)got+=creditWaives(c,gl,(label||'赠送')+'赠送话费减免');
+ if(c.waives&&c.waives.some(function(w){return w.src==='套餐'&&w.planId!==c.planId})){var old=c.waives.filter(function(w){return w.src==='套餐'&&w.planId!==c.planId});c.waives=c.waives.filter(function(w){return !(w.src==='套餐'&&w.planId!==c.planId)});addLog('话费减免',c.id,'套餐已变更，原套餐的话费减免停止：'+old.map(function(w){return w.name}).join('、'))}
+ var pl=byId(S.plans,c.planId);if(pl){var pls=[];(pl.items||[]).forEach(function(it){var p=byId(S.products,it.pid);if(!p||p.type!=='话费减免')return;if((c.waives||[]).some(function(w){return w.src==='套餐'&&w.planId===pl.id&&w.pid===p.id}))return;var w=prodWaive(p,it.qty,'套餐',pl.name,{planId:pl.id});if(w)pls.push(w)});if(pls.length)got+=creditWaives(c,pls,'套餐 '+pl.name)}
+ return got}
 function amtText(n,unit){n=r2(n);unit=String(unit||'').trim();if(!unit)return String(n);if(n===1)return unit;return (/^[0-9.]/.test(unit)?n+'×'+unit:n+' '+unit)}
 function specText(p){if(p&&p.type==='话费减免')return '减免 '+money(num(p.waiveAmt))+'/月 · 有效期 '+waiveValidText(p);var u=String(p.unit||'').trim();if(p.qty===''||p.qty==null||num(p.qty)===1)return u||(p.qty===''||p.qty==null?'-':String(p.qty));return amtText(num(p.qty),u)}
 function itemsText(items){return (items||[]).map(function(it){var p=byId(S.products,it.pid);return p?p.name+' '+amtText(num(it.qty)*num(p.qty,1),p.unit):'(已删除商品)'}).join('、')}
@@ -395,6 +409,7 @@ function applyPendingPlans(via,refDate){var n=0;S.customers.forEach(function(c){
   if(cr&&cr.applied.length)addLog('营销活动',c.id,'预约套餐生效命中活动：'+cr.applied.join('；'));
   c.paidMonth=fm;c.planFeePaidMonth=fm;
   addLog('套餐预约生效',c.id,'套餐预约生效（'+via+'）：'+(old?old.name:'-')+' → '+pl.name+'，'+p.effDate+' 起按新套餐，扣除套餐费 '+money(fee)+'，余额 '+money(c.balance)+'（预约：'+p.t+' '+(p.op||'')+'）');
+  syncWaives(c,'预约套餐生效');
   if(c.status==='在网'&&overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'预约套餐生效扣费后余额 '+money(c.balance)+'，超出信用额度，欠费停机')}});if(n)save();return n}
 function pendingPlanText(c){var p=c&&c.pendingPlan;if(!p)return '';var pl=byId(S.plans,p.planId);return (pl?pl.name:'(已删除套餐)')+'（'+p.effDate+' 生效）'}
 function setStatus(cid,st){if(st==='销户')return setStatus_raw(cid,st);return withUndo(st==='在网'?'复机':'停机',cid,function(){return setStatus_raw(cid,st)})}
@@ -419,9 +434,7 @@ function orderAddon_raw(cid,aid,extra){
  S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:[{name:'可选包：'+a.name,amt:a.price}].concat(r.discount?[{name:'活动优惠',amt:-r.discount}]:[]),total:fee,note:'订购'});
  addLog('订购',c.id,'订购'+(cat!=='通用'?cat:'')+'可选包 '+a.name+'（'+a.cycle+(addonExtraText(ex)?'，'+addonExtraText(ex):'')+'），实扣 '+money(fee)+(r.applied.length?'；命中：'+r.applied.join('；'):''));
  if(fee>0)earn(c,fee,'订购消费积分');
- var wv=addonWaives(a);if(wv.length){var wt=0;c.waives=c.waives||[];wv.forEach(function(w){c.waives.push({id:uid('W'),aid:a.id,pid:w.pid,name:w.name,amt:w.amt,start:S.month,end:w.end,last:S.month,t:nowStr()});wt=r2(wt+w.amt)});
-  c.balance=r2(c.balance+wt);addTxn(c.id,'话费减免',wt,'话费减免（订购 '+a.name+'）');S.bills.unshift({no:bizNo('ZD'),t:nowStr(),month:S.month,cid:c.id,items:wv.map(function(w){return {name:'话费减免：'+w.name,amt:-w.amt}}),total:-wt,note:'话费减免'});
-  addLog('话费减免',c.id,'订购 '+a.name+' 立即减免话费 '+money(wt)+'（'+wv.map(function(w){return w.name+' 每月 '+money(w.amt)+'，'+(w.end?'有效至 '+monthEndDate(w.end):'长期有效')}).join('；')+'）')}
+ var wv=addonWaives(a);if(wv.length)creditWaives(c,wv.map(function(w){return Object.assign({},w,{aid:a.id,src:'可选包',srcName:a.name})}),'订购 '+a.name);
  if(overCredit(c)){c.status='欠费停机';addLog('停机',c.id,'订购后欠费超出信用额度，欠费停机')}
  save();return fee;
 }
@@ -852,7 +865,7 @@ PAGES.custdetail=function(){
  // 可选包
  var ads=(c.addons||[]).map(function(x){var a=byId(S.addons,x.aid);if(!a)return '';
   return '<div style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><b>'+esc(a.name)+'</b><span class="badge b-pri">'+esc(a.cycle)+'</span><span>'+money(a.price)+'</span><span class="muted" style="font-size:12px">订购：'+esc(x.t||('账期 '+(x.month||x.paid||'-')))+(x.paid?' · 已扣至 '+esc(x.paid):'')+'</span><span style="flex:1"></span>'+(live&&!isStopped(c)?'<button class="btn s d" onclick="doCancelAddon(\''+c.id+'\',\''+a.id+'\')">退订</button>':'')+'</div>'+(addonCat(a)==='话费减免'?'<div class="kv"><div>类别</div><div>话费减免</div><div>每月减免</div><div>'+money(num(a.waiveAmt))+'</div><div>有效期</div><div>'+esc(waiveValidText(a))+'</div></div>':addonCat(a)!=='通用'?'<div class="kv"><div>类别</div><div>'+esc(addonCat(a))+'</div>'+(x.bbAcct?'<div>宽带账号</div><div class="mono">'+esc(x.bbAcct)+'</div>':'')+(x.fxNo?'<div>固话号码</div><div class="mono">'+esc(x.fxNo)+'</div>':'')+'<div>'+(addonCat(a)==='宽带'?'速率':'通话分钟')+'</div><div>'+esc(addonCat(a)==='宽带'?(a.speed||'-'):num(a.minutes)+' 分钟/月')+'</div><div>安装地址</div><div>'+esc(x.addr||'-')+'</div></div>':cdItemsTable(a.items))+'</div>'}).join('');
- var wvs=(c.waives||[]);if(wvs.length)h+=cdSection('话费减免（'+wvs.length+'）','<div class="tbl-wrap"><table><tr><th>减免商品</th><th>来源可选包</th><th class="right">每月减免</th><th>生效账期</th><th>到期日</th><th>状态</th></tr>'+wvs.map(function(w){var a=byId(S.addons,w.aid);var on=waiveActive(w,S.month);return '<tr><td><b>'+esc(w.name)+'</b></td><td>'+esc(a?a.name:'-')+'</td><td class="right">'+money(w.amt)+'</td><td>'+esc(w.start)+'</td><td>'+esc(waiveEndText(w))+'</td><td>'+(on?'<span class="badge b-ok">有效</span>':'<span class="badge">已到期</span>')+'</td></tr>'}).join('')+'</table></div><div class="muted" style="font-size:12px;margin-top:6px">订购时已立即减免一次；有效期内每月出账再减免，单月减免不超过当月账单金额；退订可选包后不再减免。</div>');
+ var wvs=(c.waives||[]);if(wvs.length)h+=cdSection('话费减免（'+wvs.length+'）','<div class="tbl-wrap"><table><tr><th>减免项目</th><th>来源</th><th class="right">每月减免</th><th>生效账期</th><th>到期日</th><th>状态</th></tr>'+wvs.map(function(w){var a=byId(S.addons,w.aid);var on=waiveActive(w,S.month);return '<tr><td><b>'+esc(w.name)+'</b></td><td>'+esc((w.src||'可选包')+'：'+(a?a.name:(w.srcName||'-')))+'</td><td class="right">'+money(w.amt)+'</td><td>'+esc(w.start)+'</td><td>'+esc(waiveEndText(w))+'</td><td>'+(on?'<span class="badge b-ok">有效</span>':'<span class="badge">已到期</span>')+'</td></tr>'}).join('')+'</table></div><div class="muted" style="font-size:12px;margin-top:6px">办理时已立即减免一次（加到余额）；有效期内每月出账再减免，单月减免不超过当月账单金额；退订可选包或变更套餐后，对应的减免停止。</div>');
  h+=cdSection('已订购可选包（'+(c.addons||[]).length+'）',ads||'<span class="muted">未订购可选包</span>');
  // 赠品
  var gifts=(c.gifts||[]).filter(function(g){return g.month===S.month&&isExchGift(g)});
@@ -908,6 +921,7 @@ function withUndo(kind,cid,fn){
  var c0=cid?byId(S.customers,cid):null;
  var sn={before:c0?JSON.stringify(c0):null,heads:undoHeads(),camp:campStat(),mall:mallStat(),rev:JSON.parse(JSON.stringify(S.monthRevenue||{}))};
  var res=fn();
+ try{var wcid=cid||(res&&res.cust&&res.cust.id);if(wcid&&kind!=='撤单'){var wc=byId(S.customers,wcid);if(wc&&syncWaives(wc,kind))save()}}catch(we){}
  try{
   var logs=newSince(S.logs,sn.heads.logs);if(!logs.length)return res;
   var main=logs[logs.length-1];var ccid=cid||(res&&res.cust&&res.cust.id)||main.cid;var c=byId(S.customers,ccid);if(!c)return res;
