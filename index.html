@@ -318,7 +318,7 @@ function itemAmt(it,p){return num(it.qty)*num(p.qty,1)*unitFactor(p)}
 function quotaItems(c){var out=[],pl=byId(S.plans,c.planId);
  function add(items,src,srcName){(items||[]).forEach(function(it){var p=byId(S.products,it.pid);if(!p||!TYPEKEY[p.type])return;out.push({key:TYPEKEY[p.type],name:p.name,src:src,srcName:srcName,amt:r2(itemAmt(it,p))})})}
  if(pl)add(pl.items,'套餐',pl.name);
- activeAddons(c).forEach(function(a){var ad=byId(S.addons,a.aid);if(ad)add(ad.items,'可选包',ad.name)});
+ activeAddons(c).forEach(function(a){var ad=byId(S.addons,a.aid);if(!ad)return;add(ad.items,'可选包',ad.name);if(addonCat(ad)==='固定电话'&&num(ad.minutes)>0)out.push({key:'voice',name:'固话本地通话'+(a.fxNo?'（'+a.fxNo+'）':''),src:'可选包',srcName:ad.name,amt:Math.round(num(ad.minutes))})});
  (c.gifts||[]).forEach(function(g){if(g.month===S.month)add([g],'赠品',g.from||'赠品')});
  return out}
 function quota(c){var q={data:0,voice:0,sms:0};quotaItems(c).forEach(function(x){q[x.key]+=x.amt});q.data=r2(q.data);q.voice=r2(q.voice);q.sms=r2(q.sms);return q}
