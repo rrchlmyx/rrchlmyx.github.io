@@ -997,10 +997,15 @@ function crossCheck(l,apply){
  if(dPts&&num(c.points)-dPts<0)return no('撤销需扣回 '+dPts+' 积分，但客户当前只有 '+c.points+' 分（积分已被使用）');
  if(dBal)notes.push(dBal>0?'扣回余额 '+money(dBal):'退回余额 '+money(-dBal));if(dPts)notes.push(dPts>0?'扣回积分 '+dPts:'退回积分 '+(-dPts));
  // 可选包
- var ba=(b.addons||[]).map(function(x){return x.aid}),aa=(a.addons||[]).map(function(x){return x.aid}),ca=(c.addons||[]).map(function(x){return x.aid});
- var addA=aa.filter(function(x){return ba.indexOf(x)<0}),remA=ba.filter(function(x){return aa.indexOf(x)<0});
- for(var k=0;k<addA.length;k++){if(ca.indexOf(addA[k])<0)return no('这笔订购的可选包之后已被退订，不能再撤')}
- for(k=0;k<remA.length;k++){if(ca.indexOf(remA[k])>=0)return no('这笔退订的可选包之后又重新订购了，不能再撤')}
+ function rec(arr,aid){return (arr||[]).filter(function(x){return x.aid===aid})[0]}function same(x,y){return !!x&&!!y&&(x.t||'')===(y.t||'')}
+ var ba=(b.addons||[]).map(function(x){return x.aid}),aa=(a.addons||[]).map(function(x){return x.aid});
+ var addA=aa.filter(function(x){return !same(rec(b.addons,x),rec(a.addons,x))}),remA=ba.filter(function(x){return !same(rec(a.addons,x),rec(b.addons,x))});
+ for(var k=0;k<addA.length;k++){if(!same(rec(c.addons,addA[k]),rec(a.addons,addA[k])))return no('这笔订购的可选包之后已被退订（或已重新订购），不能再撤')}
+ for(k=0;k<remA.length;k++){if(rec(c.addons,remA[k])&&!rec(a.addons,remA[k]))return no('这笔退订的可选包之后又重新订购了，不能再撤')}
+ // 话费减免 / 赠送积分 明细（按条目 id）
+ var ent={};['waives','ptGifts'].forEach(function(key){var bi=(b[key]||[]).map(function(x){return x.id}),ai=(a[key]||[]).map(function(x){return x.id}),ci=(c[key]||[]).map(function(x){return x.id});ent[key]={add:ai.filter(function(x){return bi.indexOf(x)<0}),rem:(b[key]||[]).filter(function(x){return ai.indexOf(x.id)<0&&ci.indexOf(x.id)<0})}});
+ for(var ek in ent){for(k=0;k<ent[ek].add.length;k++){if(!(c[ek]||[]).some(function(x){return x.id===ent[ek].add[k]}))return no('这笔业务带来的'+(ek==='waives'?'话费减免':'赠送积分')+'之后已停止（退订或变更套餐），不能再撤')}}
+ if(ent.ptGifts.add.length)notes.push('停止这笔业务的每月赠送积分');if(ent.waives.add.length)notes.push('停止这笔业务的话费减免');
  if(addA.length||remA.length)notes.push('恢复可选包订购状态');
  // 赠品
  var bg=(b.gifts||[]).map(J),ag=(a.gifts||[]).map(J),cg=(c.gifts||[]).map(J);var addG=ag.filter(function(x){return bg.indexOf(x)<0}),remG=bg.filter(function(x){return ag.indexOf(x)<0});
@@ -1015,7 +1020,7 @@ function crossCheck(l,apply){
  for(k=0;k<addI.length;k++){var ci=(c.installs||[]).filter(function(x){return x.id===addI[k].id})[0];if(ci&&ci.items.some(function(i){return i.paid}))return no('这笔充值的分月返还已经返过，不能再撤')}
  if(addI.length)notes.push('取消分月返还计划');
  // 套餐、级别、其它字段：之后没再变动才能恢复
- var handled={id:1,balance:1,points:1,addons:1,gifts:1,camps:1,installs:1,levelHist:1,usage:1,status:1};
+ var handled={id:1,balance:1,points:1,addons:1,gifts:1,camps:1,installs:1,levelHist:1,usage:1,status:1,waives:1,ptGifts:1};
  var keys={};Object.keys(a).concat(Object.keys(b)).forEach(function(x){keys[x]=1});
  var restore=[];
  for(var key in keys){if(handled[key]||J(a[key])===J(b[key]))continue;
@@ -1032,8 +1037,9 @@ function crossCheck(l,apply){
  var text=(notes.length?notes.join('；'):'无客户余额/积分变化')+'。之后的业务保持不变';
  if(!apply)return {ok:true,text:text,bal:-dBal,pts:-dPts};
  c.balance=nb;c.points=num(c.points)-dPts;
- if(addA.length)c.addons=(c.addons||[]).filter(function(x){return addA.indexOf(x.aid)<0});
- remA.forEach(function(id){var o=(b.addons||[]).filter(function(x){return x.aid===id})[0];if(o)c.addons=(c.addons||[]).concat([o])});
+ if(addA.length)c.addons=(c.addons||[]).filter(function(x){return !(addA.indexOf(x.aid)>=0&&same(x,rec(a.addons,x.aid)))});
+ remA.forEach(function(id){var o=rec(b.addons,id);if(o&&!rec(c.addons,id))c.addons=(c.addons||[]).concat([o])});
+ ['waives','ptGifts'].forEach(function(key){var e=ent[key];if(!e.add.length&&!e.rem.length)return;c[key]=(c[key]||[]).filter(function(x){return e.add.indexOf(x.id)<0}).concat(e.rem)});
  if(addG.length){var left=addG.slice();c.gifts=(c.gifts||[]).filter(function(g){var i=left.indexOf(J(g));if(i>=0){left.splice(i,1);return false}return true})}
  remG.forEach(function(g){c.gifts=(c.gifts||[]).concat([JSON.parse(g)])});
  if(addC.length||remC.length)c.camps=(c.camps||[]).filter(function(x){return addC.indexOf(x)<0}).concat(remC);
@@ -1120,8 +1126,9 @@ function dlgUndo(no,after){var l=S.logs.filter(function(x){return x.no===no})[0]
 function undoCell(l){if(l.undone)return '<span class="badge b-warn">已撤单</span>'+undoCellTag(l);if(!l.undo)return '<span class="muted">-</span>';
  if(canUndo(l))return '<button class="btn s d" onclick="dlgUndo(\''+l.no+'\')">撤单</button>';
  if(l.type==='开户'&&!l.undo.before){if(hasUndoOpen()){var ok2=undoOpenCheck(l);if(ok2.ok)return '<button class="btn s d" onclick="dlgUndoOpen(\''+l.no+'\')" title="连带撤销该客户之后的全部业务">撤销开户</button>';return '<span class="muted" style="font-size:12px" title="'+esc(ok2.reason)+'">不可撤</span>'}return '<span class="muted" style="font-size:12px" title="'+OPEN_BLOCK_MSG+'">需先撤后续</span>'}
- if(hasCrossUndo()){var ck=crossCheck(l);if(ck.ok)return '<button class="btn s d" onclick="dlgUndo(\''+l.no+'\')" title="跨单撤单：只回退这一笔">跨单撤单</button>';return '<span class="muted" style="font-size:12px" title="'+esc(ck.reason)+'">不可撤</span>'}
+ if(hasCrossUndo()){var ck=crossCheck(l);if(ck.ok)return '<button class="btn s d" onclick="dlgUndo(\''+l.no+'\')" title="跨单撤单：只回退这一笔">跨单撤单</button>';return '<a class="muted" style="font-size:12px;cursor:pointer" title="'+esc(ck.reason)+'" onclick="undoWhy(\''+l.no+'\')">不可撤</a><div class="muted" style="font-size:11px;white-space:normal;min-width:120px;max-width:180px">'+esc(ck.reason)+'</div>'}
  return '<span class="muted" style="font-size:12px" title="'+UNDO_BLOCK_MSG+'">需先撤后续</span>'}
+function undoWhy(no){var l=S.logs.filter(function(x){return x.no===no})[0];if(!l)return;var ck=crossCheck(l);toast(ck.ok?'可以撤单':'不能撤单：'+ck.reason)}
 function undoCellTag(l){return (l.crossUndo?' <span class="badge b-pri">跨单撤单</span>':'')+(l.openCascade!==undefined?' <span class="badge b-pri">撤销开户</span>':'')+(l.cascadeOf&&l.openCascade===undefined?' <span class="muted" style="font-size:11px">随开户撤销</span>':'')}
 // 撤单申请工单
 function undoableLogs(cid){return S.logs.filter(function(l){return l.cid===cid&&l.undo&&!l.undone}).slice(0,30)}
